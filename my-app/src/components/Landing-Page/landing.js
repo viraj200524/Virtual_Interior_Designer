@@ -1,7 +1,9 @@
 import React from "react";
 import { Star } from "lucide-react";
 import "./Landing.css";
-import landingImg from "./landingimg.png";
+import landingImg from './landingimg.png'
+import { useAuth0 } from "@auth0/auth0-react";
+import Navbar from "../NavBar/Navbar";
 
 const Landing = () => {
   const testimonials = [
@@ -26,17 +28,9 @@ const Landing = () => {
   ];
 
   return (
-    <div className="landing-container">
-      <div className="hero-section">
-        <nav className="navbar">
-          <div className="logo">Decora</div>
-          <div className="nav-links">
-            <a href="#about">About</a>
-            <a href="#features">Features</a>
-            <button className="try-now-btn">Login</button>
-          </div>
-        </nav>
-
+    <>
+      <div className="landing-container">
+        <Navbar />
         <div className="hero-content">
           <div className="hero-text">
             <h1>Transform Your Space within minutes...</h1>
@@ -51,7 +45,6 @@ const Landing = () => {
           </div>
         </div>
       </div>
-
       <div className="testimonials-section">
         <h2>What People Say</h2>
         <div className="testimonials-container">
@@ -71,7 +64,7 @@ const Landing = () => {
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

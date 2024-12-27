@@ -13,17 +13,16 @@ function App() {
         authorizationParams={{
           redirect_uri: "http://localhost:3000/main-page"
         }}
+        
       >
-    <div className="App">
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path = "/main-page" element={<MainPage/>}/>
-      </Routes>
-    </div>
-    </Auth0Provider>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/main-page" element={<MainPage/>}/>
+          </Routes>
+        </div>
+      </Auth0Provider>
     </Router>
-    
-    
   );
 }
 

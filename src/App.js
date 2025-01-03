@@ -1,5 +1,5 @@
 import React from 'react';
-import LandingPage from './components/Landing-Page/landing'
+import LandingPage from './components/Landing-Page/landing';
 import { Auth0Provider } from '@auth0/auth0-react';
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import MainPage from './components/MainPage/MainPage';

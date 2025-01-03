@@ -1,11 +1,16 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef,useState } from "react";
 import { useLocation } from "react-router-dom";
 import * as THREE from "three";
 import { OrbitControls } from 'three-stdlib';
+import Sofa from '../Furniture/Sofa.js';
+import { GLTFLoader } from "three-stdlib";
 
 const ThreeDView = () => {
   const mountRef = useRef(null);
   const location = useLocation();
+  const [sceneObjects, setSceneObjects] = useState(null);
+  const [sofaModel, setSofaModel] = useState(null);
+  const controlsRef = useRef(null);
 
   useEffect(() => {
     const walls = location.state?.layout || [];
@@ -122,6 +127,7 @@ const ThreeDView = () => {
     controls.minDistance = 500;
     controls.maxDistance = 3000;
     controls.target.set(0, wallHeight / 2, 0);
+    controlsRef.current = controls;
 
     // Wall facing camera check
     const getMostFacingWall = () => {
@@ -145,6 +151,38 @@ const ThreeDView = () => {
 
       return mostFacingWall;
     };
+
+    const loader = new GLTFLoader();
+    loader.load(
+      'scene.gltf',
+      (gltf) => {
+        const sofa = gltf.scene;
+        sofa.position.set(0, 0, 0);
+        sofa.scale.set(2, 2, 2);
+        
+        // Make sure the sofa and all its children can be raycasted
+        sofa.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        
+        setSofaModel(sofa);
+      },
+      undefined,
+      (error) => {
+        console.error('Error loading GLTF model:', error);
+      }
+    );
+
+    // Store references to scene objects
+    setSceneObjects({
+      scene,
+      camera,
+      renderer,
+      floor
+    });
 
     // Animation loop
     const animate = () => {
@@ -191,8 +229,17 @@ const ThreeDView = () => {
 
   return (
     <div className="relative w-full h-screen bg-gray-100">
-      {/* Placeholder for 3D View */}
       <div ref={mountRef} className="w-full h-full flex items-center justify-center text-gray-400"/>
+      {sceneObjects && sofaModel && controlsRef.current && (
+        <Sofa
+          scene={sceneObjects.scene}
+          camera={sceneObjects.camera}
+          renderer={sceneObjects.renderer}
+          floor={sceneObjects.floor}
+          sofaModel={sofaModel}
+          controls={controlsRef.current}
+        />
+      )}
     </div>
   );
 };

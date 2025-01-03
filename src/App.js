@@ -15,7 +15,6 @@ function App() {
         authorizationParams={{
           redirect_uri: "http://localhost:3000/main-page"
         }}
-        
       >
         <div className="App">
           <Routes>

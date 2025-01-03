@@ -1,42 +1,23 @@
 import React, { useState } from 'react';
 import { Search, User, Plus } from 'lucide-react';
 import './MainPage.css';
+import { useNavigate } from 'react-router-dom';
+import RoomCard from './RoomCard';
+import { useAuth0 } from '@auth0/auth0-react';
+import LogoutButton from '../Login-in/LogoutButton';
 
 // NavLink Component
 function NavLink({ children }) {
   return (
-    <a href="#" className="nav-link">
+    <a href="/" className="nav-link">
       {children}
     </a>
   );
 }
 
-// RoomCard Component
-function RoomCard({ title, isAdd = false, onAdd, onDelete }) {
-  return (
-    <div className={`room-card ${isAdd ? 'room-card-add' : ''}`}>
-      {isAdd ? (
-        <>
-          <Plus className="icon" onClick={onAdd} />
-          <span className="add-text">Add New Room</span>
-        </>
-      ) : (
-        <>
-          <div className="room-image"></div>
-          <span className="room-title">{title}</span>
-          {onDelete && (
-            <button className="delete-btn" onClick={() => onDelete(title)}>
-              Delete
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
 // Navigation Component
 function Navigation() {
+
   return (
     <nav className="nav">
       <div className="nav-content">
@@ -60,6 +41,7 @@ function Navigation() {
           <button className="profile-button">
             <User className="profile-icon" />
           </button>
+          <LogoutButton/>
         </div>
       </div>
     </nav>
@@ -101,6 +83,8 @@ function AddRoomModal({ isOpen, onClose, onAdd }) {
 
 // Main Page Component
 function MainPage() {
+  const {user} = useAuth0()
+  const navigate = useNavigate()
   const [rooms, setRooms] = useState(['Living Room', 'Bedroom', 'Kitchen']);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -112,13 +96,14 @@ function MainPage() {
     setRooms(rooms.filter(room => room !== roomName));
   };
 
+  
   return (
     <div className="container">
       <Navigation />
       
       <main className="main">
         <div className="welcome-section">
-          <h2 className="welcome-title">Hello User_Name!</h2>
+          <h2 className="welcome-title">Hello {user?.name || "Guest"}</h2>
           <p className="welcome-text">Let's start building your dream space</p>
         </div>
 

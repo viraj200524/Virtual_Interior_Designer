@@ -278,6 +278,24 @@
   transition: opacity 0.2s;
 }
 
+.edit-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8B5E3D;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
 .room-card:hover .delete-button {
   opacity: 1;
 }

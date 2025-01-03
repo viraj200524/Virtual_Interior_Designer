@@ -15,8 +15,11 @@ import landingImg from "./landingimg.png";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "../Login-in/LogoutButton";
 import LoginButton from "../Login-in/LoginButton";
+import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
+  const navigate = useNavigate(); // Initialize navigate function
+
   const testimonials = [
     {
       name: "Mohammed Bhadsorawala",
@@ -28,13 +31,13 @@ const Landing = () => {
       name: "Adi Awaskar",
       role: "Homeowner",
       rating: 5,
-      text: "Transformed my space without the guesswork. The Budget Estimater is spot-on and helped me achieve exactly what I envisioned, while staying in budget.",
+      text: "Transformed my space without the guesswork. The Budget Estimator is spot-on and helped me achieve exactly what I envisioned, while staying in budget.",
     },
     {
       name: "Aarya B",
       role: "Architect",
       rating: 4,
-      text: "I'm really impressed with this tool! It's incredibly convenient and easy to use. I can now bring concepts to life faster than ever before",
+      text: "I'm really impressed with this tool! It's incredibly convenient and easy to use. I can now bring concepts to life faster than ever before.",
     },
   ];
 
@@ -65,8 +68,7 @@ const Landing = () => {
     },
   ];
 
-  // Auth0 hook
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated } = useAuth0(); // Auth0 hook for authentication
 
   return (
     <>
@@ -92,7 +94,12 @@ const Landing = () => {
               Experience the future of interior design at your fingertips. Turn
               your ideas into stylish designs in seconds.
             </p>
-            <button className="start-designing-btn">Get Started</button>
+            <button
+              className="start-designing-btn"
+              onClick={() => navigate("/main-page")}
+            >
+              Get Started
+            </button>
           </div>
           <div className="hero-image">
             <img src={landingImg} alt="Interior Design Preview" />

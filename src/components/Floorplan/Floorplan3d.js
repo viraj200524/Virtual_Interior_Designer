@@ -1,16 +1,31 @@
-import React, { useEffect, useRef,useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import * as THREE from "three";
-import { OrbitControls } from 'three-stdlib';
-import Sofa from '../Furniture/Sofa.js';
+import { OrbitControls } from "three-stdlib";
+import Sofa from "../Furniture/Sofa.js";
 import { GLTFLoader } from "three-stdlib";
+import "./Floorplan3d.css";
 
-const ThreeDView = () => {
+
+const FloorPlan3D = () => {
   const mountRef = useRef(null);
   const location = useLocation();
   const [sceneObjects, setSceneObjects] = useState(null);
   const [sofaModel, setSofaModel] = useState(null);
+  const [furnitureItems, setFurnitureItems] = useState([]);
+  const [activeTab, setActiveTab] = useState("MODELS");
   const controlsRef = useRef(null);
+
+  useEffect(() => {
+    const dummyFurniture = Array.from({ length: 12 }, (_, i) => ({
+      id: i + 1,
+      name: `Furniture Item ${i + 1}`,
+      price: 299.99 + i * 100,
+      image: "/api/placeholder/200/200",
+      amazonLink: "https://amazon.com",
+    }));
+    setFurnitureItems(dummyFurniture);
+  }, []);
 
   useEffect(() => {
     const walls = location.state?.layout || [];
@@ -26,7 +41,7 @@ const ThreeDView = () => {
     // Camera setup
     const camera = new THREE.PerspectiveCamera(
       45,
-      window.innerWidth / window.innerHeight,
+      mountRef.current.clientWidth / mountRef.current.clientHeight,
       1,
       10000
     );
@@ -36,9 +51,12 @@ const ThreeDView = () => {
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true
+      alpha: true,
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(
+      mountRef.current.clientWidth,
+      mountRef.current.clientHeight
+    );
     renderer.setPixelRatio(window.devicePixelRatio);
     mountRef.current.appendChild(renderer.domElement);
 
@@ -48,23 +66,26 @@ const ThreeDView = () => {
       roughness: 0.2,
       metalness: 0.1,
       transparent: true,
-      opacity: 1
+      opacity: 1,
     });
 
     const floorMaterial = new THREE.MeshStandardMaterial({
       color: 0xf0f0f0,
       roughness: 0.5,
-      metalness: 0.1
+      metalness: 0.1,
     });
 
     // Find layout bounds
-    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    walls.forEach(wall => {
-      [wall.points[0], wall.points[2]].forEach(x => {
+    let minX = Infinity,
+      maxX = -Infinity,
+      minY = Infinity,
+      maxY = -Infinity;
+    walls.forEach((wall) => {
+      [wall.points[0], wall.points[2]].forEach((x) => {
         minX = Math.min(minX, x);
         maxX = Math.max(maxX, x);
       });
-      [wall.points[1], wall.points[3]].forEach(y => {
+      [wall.points[1], wall.points[3]].forEach((y) => {
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);
       });
@@ -78,14 +99,18 @@ const ThreeDView = () => {
     const wallThickness = 10;
     const wallMeshes = [];
 
-    walls.forEach(wall => {
+    walls.forEach((wall) => {
       const [x1, y1, x2, y2] = wall.points;
 
       const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
       const centerWallX = (x1 + x2) / 2 - centerX;
       const centerWallY = (y1 + y2) / 2 - centerY;
 
-      const wallGeometry = new THREE.BoxGeometry(length, wallHeight, wallThickness);
+      const wallGeometry = new THREE.BoxGeometry(
+        length,
+        wallHeight,
+        wallThickness
+      );
       const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
 
       wallMesh.position.set(centerWallX, wallHeight / 2, centerWallY);
@@ -129,96 +154,39 @@ const ThreeDView = () => {
     controls.target.set(0, wallHeight / 2, 0);
     controlsRef.current = controls;
 
-    // Wall facing camera check
-    const getMostFacingWall = () => {
-      let mostFacingWall = null;
-      let minAngle = Infinity;
-
-      wallMeshes.forEach(wallMesh => {
-        const cameraDirection = new THREE.Vector3().subVectors(camera.position, wallMesh.position).normalize();
-        const wallNormal = new THREE.Vector3(0, 0, 1);
-        const rotationMatrix = new THREE.Matrix4().identity();
-        rotationMatrix.makeRotationFromEuler(wallMesh.rotation);
-        wallNormal.applyMatrix4(rotationMatrix);
-
-        const angle = wallNormal.dot(cameraDirection);
-
-        if (angle < minAngle) {
-          minAngle = angle;
-          mostFacingWall = wallMesh;
-        }
-      });
-
-      return mostFacingWall;
-    };
-
-    const loader = new GLTFLoader();
-    loader.load(
-      'scene.gltf',
-      (gltf) => {
-        const sofa = gltf.scene;
-        sofa.position.set(0, 0, 0);
-        sofa.scale.set(2, 2, 2);
-        
-        // Make sure the sofa and all its children can be raycasted
-        sofa.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        
-        setSofaModel(sofa);
-      },
-      undefined,
-      (error) => {
-        console.error('Error loading GLTF model:', error);
-      }
-    );
-
-    // Store references to scene objects
-    setSceneObjects({
-      scene,
-      camera,
-      renderer,
-      floor
-    });
-
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
-
-      const mostFacingWall = getMostFacingWall();
-
-      wallMeshes.forEach(wallMesh => {
-        if (wallMesh === mostFacingWall) {
-          wallMesh.material.opacity = 0.5; // Make the wall semi-transparent
-        } else {
-          wallMesh.material.opacity = 1; // Make the wall opaque
-        }
-      });
-
-      floor.material.opacity = 1; // Ensure the floor is always opaque
-
       renderer.render(scene, camera);
     };
     animate();
 
+    // Store references
+    setSceneObjects({
+      scene,
+      camera,
+      renderer,
+      floor,
+    });
+
     // Handle window resize
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.aspect =
+        mountRef.current.clientWidth / mountRef.current.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(
+        mountRef.current.clientWidth,
+        mountRef.current.clientHeight
+      );
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
-    // Cleanup
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       mountRef.current?.removeChild(renderer.domElement);
       renderer.dispose();
-      scene.traverse(object => {
+      scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose();
           object.material.dispose();
@@ -228,20 +196,65 @@ const ThreeDView = () => {
   }, [location]);
 
   return (
-    <div className="relative w-full h-screen bg-gray-100">
-      <div ref={mountRef} className="w-full h-full flex items-center justify-center text-gray-400"/>
-      {sceneObjects && sofaModel && controlsRef.current && (
-        <Sofa
-          scene={sceneObjects.scene}
-          camera={sceneObjects.camera}
-          renderer={sceneObjects.renderer}
-          floor={sceneObjects.floor}
-          sofaModel={sofaModel}
-          controls={controlsRef.current}
-        />
-      )}
+    
+    <div className="decora-container">
+      <div className="main-content">
+        <div className="layout-container">
+          <div ref={mountRef} className="threejs-container" />
+        </div>
+
+        <div className="furniture-section">
+          <div className="furniture-header">
+            <button
+              className={`header-button ${
+                activeTab === "MODELS" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("MODELS")}
+            >
+              MODELS
+            </button>
+            <button
+              className={`header-button ${
+                activeTab === "FURNITURE" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("FURNITURE")}
+            >
+              FURNITURE
+            </button>
+            <button
+              className={`header-button ${
+                activeTab === "PAINT" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("PAINT")}
+            >
+              PAINT
+            </button>
+           
+          </div>
+
+          <div className="furniture-grid">
+            {furnitureItems.map((item) => (
+              <div key={item.id} className="furniture-card">
+                <img src={item.image} alt={item.name} />
+                <div className="card-content">
+                  <h3>{item.name}</h3>
+                  <p className="price">${item.price}</p>
+                  <a
+                    href={item.amazonLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View on Amazon
+                  </a>
+                  <button className="add-button">+</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ThreeDView;
+export default FloorPlan3D;

@@ -1,7 +1,0 @@
-print(f"Product Name: {name}")
-        print(f"Price: {price}")
-        print(f"Image URL: {image_url}")
-        print(f"MRP: {mrp}")
-        print(f"Discount: {discount}")
-        print(f"EMI Option: {emi}")
-        print("-" * 40)

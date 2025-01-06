@@ -6,39 +6,60 @@ import Sofa from "../Furniture/Sofa.js";
 import { GLTFLoader } from "three-stdlib";
 import "./Floorplan3d.css";
 
+// FurnitureCard Component
+const FurnitureCard = ({ product }) => (
+  <div className="furniture-card">
+    <img src={product.image_url} alt={product.name} />
+    <div className="card-content">
+      <h3 className="product-name">{product.name}</h3>
+      <p className="price">
+        <span className="mrp">₹{product.mrp}</span>{" "}
+        <span className="discounted-price">₹{product.price}</span>
+      </p>
+      <p className="emi-options">
+        EMI starts at ₹{Math.round(product.price / 12)}
+      </p>
+      <a href="#" className="buy-link">
+        Buy this product
+      </a>
+    </div>
+  </div>
+);
 
 const FloorPlan3D = () => {
   const mountRef = useRef(null);
   const location = useLocation();
   const [sceneObjects, setSceneObjects] = useState(null);
-  const [sofaModel, setSofaModel] = useState(null);
   const [furnitureItems, setFurnitureItems] = useState([]);
   const [activeTab, setActiveTab] = useState("MODELS");
   const controlsRef = useRef(null);
 
+  // Fetch scraped data
   useEffect(() => {
-    const dummyFurniture = Array.from({ length: 12 }, (_, i) => ({
-      id: i + 1,
-      name: `Furniture Item ${i + 1}`,
-      price: 299.99 + i * 100,
-      image: "/api/placeholder/200/200",
-      amazonLink: "https://amazon.com",
-    }));
-    setFurnitureItems(dummyFurniture);
+    const fetchFurnitureData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/products");
+        const data = await response.json();
+        setFurnitureItems(data);
+      } catch (error) {
+        console.error("Error fetching furniture data:", error);
+      }
+    };
+
+    fetchFurnitureData();
   }, []);
 
   useEffect(() => {
+    // Scene setup (No changes here)
     const walls = location.state?.layout || [];
     if (!walls.length) {
       console.warn("No walls data received");
       return;
     }
 
-    // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf5f5f5);
 
-    // Camera setup
     const camera = new THREE.PerspectiveCamera(
       45,
       mountRef.current.clientWidth / mountRef.current.clientHeight,
@@ -48,11 +69,7 @@ const FloorPlan3D = () => {
     camera.position.set(-500, 800, 1000);
     camera.lookAt(0, 0, 0);
 
-    // Renderer setup
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-    });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(
       mountRef.current.clientWidth,
       mountRef.current.clientHeight
@@ -60,7 +77,6 @@ const FloorPlan3D = () => {
     renderer.setPixelRatio(window.devicePixelRatio);
     mountRef.current.appendChild(renderer.domElement);
 
-    // Materials
     const wallMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.2,
@@ -75,7 +91,6 @@ const FloorPlan3D = () => {
       metalness: 0.1,
     });
 
-    // Find layout bounds
     let minX = Infinity,
       maxX = -Infinity,
       minY = Infinity,
@@ -94,14 +109,12 @@ const FloorPlan3D = () => {
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
 
-    // Create walls
     const wallHeight = 250;
     const wallThickness = 10;
     const wallMeshes = [];
 
     walls.forEach((wall) => {
       const [x1, y1, x2, y2] = wall.points;
-
       const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
       const centerWallX = (x1 + x2) / 2 - centerX;
       const centerWallY = (y1 + y2) / 2 - centerY;
@@ -114,7 +127,6 @@ const FloorPlan3D = () => {
       const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
 
       wallMesh.position.set(centerWallX, wallHeight / 2, centerWallY);
-
       const angle = Math.atan2(y2 - y1, x2 - x1);
       wallMesh.rotation.y = -angle;
 
@@ -122,7 +134,6 @@ const FloorPlan3D = () => {
       wallMeshes.push(wallMesh);
     });
 
-    // Create floor
     const floorWidth = maxX - minX;
     const floorDepth = maxY - minY;
     const floorGeometry = new THREE.PlaneGeometry(floorWidth, floorDepth);
@@ -131,7 +142,6 @@ const FloorPlan3D = () => {
     floor.position.set(0, 0, 0);
     scene.add(floor);
 
-    // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
@@ -143,7 +153,6 @@ const FloorPlan3D = () => {
     directionalLight2.position.set(-500, 1000, -500);
     scene.add(directionalLight2);
 
-    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.1;
@@ -154,7 +163,6 @@ const FloorPlan3D = () => {
     controls.target.set(0, wallHeight / 2, 0);
     controlsRef.current = controls;
 
-    // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
@@ -162,15 +170,8 @@ const FloorPlan3D = () => {
     };
     animate();
 
-    // Store references
-    setSceneObjects({
-      scene,
-      camera,
-      renderer,
-      floor,
-    });
+    setSceneObjects({ scene, camera, renderer, floor });
 
-    // Handle window resize
     const handleResize = () => {
       camera.aspect =
         mountRef.current.clientWidth / mountRef.current.clientHeight;
@@ -196,7 +197,6 @@ const FloorPlan3D = () => {
   }, [location]);
 
   return (
-    
     <div className="decora-container">
       <div className="main-content">
         <div className="layout-container">
@@ -229,26 +229,11 @@ const FloorPlan3D = () => {
             >
               PAINT
             </button>
-           
           </div>
 
           <div className="furniture-grid">
-            {furnitureItems.map((item) => (
-              <div key={item.id} className="furniture-card">
-                <img src={item.image} alt={item.name} />
-                <div className="card-content">
-                  <h3>{item.name}</h3>
-                  <p className="price">${item.price}</p>
-                  <a
-                    href={item.amazonLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View on Amazon
-                  </a>
-                  <button className="add-button">+</button>
-                </div>
-              </div>
+            {furnitureItems.map((product) => (
+              <FurnitureCard key={product.id} product={product} />
             ))}
           </div>
         </div>

@@ -1,15 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
-/* Add these styles to your Floorplan3d.css file */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
-.decora-container {
-  padding-top: 1rem;
-}
-
-/* Ensure the threejs-container adjusts for the navbar */
-.threejs-container {
-  height: calc(100vh - 80px); /* Adjust the 80px based on your navbar height */
-}
 .decora-container {
     min-height: 100vh;
     background-color: #c9a673;
@@ -74,14 +65,6 @@
 .header-button.active {
     background-color: #8B4513;
     color: #ffffff;
-}
-
-.profile-icon {
-    width: 35px;
-    height: 35px;
-    background-color: #8B4513;
-    border-radius: 50%;
-    margin-left: auto;
 }
 
 .furniture-grid {
@@ -176,6 +159,21 @@
 .add-button:hover {
     background-color: #8B4513;
     color: #ffffff;
+}
+
+.mrp {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 0.5rem;
+}
+
+.discounted-price {
+    color: #8B4513;
+}
+
+.emi-options {
+    font-size: 0.9rem;
+    color: #666;
 }
 
 @media (max-width: 1200px) {

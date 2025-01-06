@@ -1,65 +1,116 @@
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
+import random
+import time
+from fake_useragent import UserAgent
+import json
 
-# URL of the Pepperfry webpage
-url = "https://www.pepperfry.com/site_product/search?q=furniture&requestPlatform=web&sort_field=sorting_score&sort_by=desc&as=0&src=furniture&autoSuggest=1&page=2"
+app = Flask(__name__)
+CORS(app)  # Enable Cross-Origin Resource Sharing for React app
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
-}
+# Scraper Class
+class PepperfryScraper:
+    def __init__(self):
+        self.session = requests.Session()
+        self.ua = UserAgent()
 
-response = requests.get(url, headers=headers)
+    def get_random_headers(self):
+        return {
+            'User-Agent': self.ua.random,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Cache-Control': 'max-age=0',
+            'DNT': '1'
+        }
+
+    def fetch_page(self, url, retries=3):
+        for attempt in range(retries):
+            try:
+                time.sleep(random.uniform(2, 5))
+                response = self.session.get(
+                    url,
+                    headers=self.get_random_headers(),
+                    timeout=30
+                )
+                if response.status_code == 200:
+                    return response
+                time.sleep(random.uniform(5, 10))
+            except Exception as e:
+                print(f"Error on attempt {attempt + 1}: {str(e)}")
+                if attempt < retries - 1:
+                    time.sleep(random.uniform(5, 10))
+        return None
+
+    def extract_product_data(self, card):
+        try:
+            data = {
+                'name': card.select_one("h2.product-name").text.strip() if card.select_one("h2.product-name") else "N/A",
+                'price': card.select_one("span.product-offer-price").text.strip() if card.select_one("span.product-offer-price") else "N/A",
+                'image_url': card.select_one("img")['src'].strip() if card.select_one("img") else "N/A",
+                'mrp': card.select_one("span.product-mrp-price").text.strip() if card.select_one("span.product-mrp-price") else "N/A",
+                'discount': card.select_one("span.product-discount").text.strip() if card.select_one("span.product-discount") else "N/A",
+                'emi': card.select_one("div.product-emi").text.strip() if card.select_one("div.product-emi") else "N/A"
+            }
+            return data
+        except Exception as e:
+            print(f"Error extracting product data: {str(e)}")
+            return None
+
+    def scrape_products(self, base_url, max_products=500):
+        all_products = []
+        page = 1
+        while len(all_products) < max_products:
+            url = f"{base_url}&page={page}"
+            print(f"Scraping page {page}...")
+
+            response = self.fetch_page(url)
+            if not response:
+                break
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+            product_cards = soup.select(".product-card-container")
+
+            if not product_cards:
+                break
+
+            for card in product_cards:
+                product_data = self.extract_product_data(card)
+                if product_data:
+                    all_products.append(product_data)
+                if len(all_products) >= max_products:
+                    break
+
+            print(f"Products found so far: {len(all_products)}")
+            page += 1
+
+        return all_products
 
 
-# Check if the request was successful
-if response.status_code == 200:
-    soup = BeautifulSoup(response.text, 'html.parser')
+@app.route('/scrape', methods=['POST'])
+def scrape_data():
+    base_url = request.json.get('base_url', "https://www.pepperfry.com/site_product/search?q=furniture")
+    scraper = PepperfryScraper()
+    max_products = 500
+    products = scraper.scrape_products(base_url, max_products)
+    with open('./products.json', 'w') as f:
+        json.dump(products, f, indent=4)
+    return jsonify({'message': 'Data scraped successfully!', 'product_count': len(products)})
 
-    # Select the main div containing all product cards
-    main_div = soup.select_one("pf.clip-product-listing")
 
-    if main_div:
-        # Extract all sub-divs (each representing a product card)
-        product_cards = main_div.find_all("div", recursive=False)
+@app.route('/products', methods=['GET'])
+def get_products():
+    try:
+        with open('./products.json', 'r') as f:
+            products = json.load(f)
+        return jsonify(products)
+    except FileNotFoundError:
+        return jsonify({'error': 'No data found. Please scrape first using /scrape endpoint.'}), 404
 
-        # Extract data for each card
-        for card in product_cards:
-            # Extract product name
-            name_tag = card.select_one("h2.product-name")
-            name = name_tag.text.strip() if name_tag else "N/A"
 
-            # Extract discounted price
-            price_tag = card.select_one("span.product-offer-price")
-            price = price_tag.text.strip() if price_tag else "N/A"
-
-            # Extract product image URL
-            image_tag = card.select_one("img")
-            image_url = image_tag['src'].strip() if image_tag else "N/A"
-
-            # Extract MRP
-            mrp_tag = card.select_one("span.product-mrp-price")
-            mrp = mrp_tag.text.strip() if mrp_tag else "N/A"
-
-            # Extract discount percentage
-            discount_tag = card.select_one("span.product-discount")
-            discount = discount_tag.text.strip() if discount_tag else "N/A"
-
-            # Extract EMI option
-            emi_tag = card.select_one("div.product-emi")
-            emi = emi_tag.text.strip() if emi_tag else "N/A"
-
-            # Print the extracted information
-            print(f"Product Name: {name}")
-            print(f"Price: {price}")
-            print(f"Image URL: {image_url}")
-            print(f"MRP: {mrp}")
-            print(f"Discount: {discount}")
-            print(f"EMI Option: {emi}")
-            print("-" * 40)
-    else:
-        print("Failed to find the main div containing product cards.")
-else:
-    print(f"Failed to fetch the webpage. Status code: {response.status_code}")
+if __name__ == '__main__':
+    app.run(debug=True)

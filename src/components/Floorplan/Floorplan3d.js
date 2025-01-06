@@ -5,26 +5,8 @@ import { OrbitControls } from "three-stdlib";
 import Sofa from "../Furniture/Sofa.js";
 import { GLTFLoader } from "three-stdlib";
 import "./Floorplan3d.css";
+import FurnitureGrid from "./FurnitureGrid.js";
 
-// FurnitureCard Component
-const FurnitureCard = ({ product }) => (
-  <div className="furniture-card">
-    <img src={product.image_url} alt={product.name} />
-    <div className="card-content">
-      <h3 className="product-name">{product.name}</h3>
-      <p className="price">
-        <span className="mrp">₹{product.mrp}</span>{" "}
-        <span className="discounted-price">₹{product.price}</span>
-      </p>
-      <p className="emi-options">
-        EMI starts at ₹{Math.round(product.price / 12)}
-      </p>
-      <a href="#" className="buy-link">
-        Buy this product
-      </a>
-    </div>
-  </div>
-);
 
 const FloorPlan3D = () => {
   const mountRef = useRef(null);
@@ -33,20 +15,16 @@ const FloorPlan3D = () => {
   const [furnitureItems, setFurnitureItems] = useState([]);
   const [activeTab, setActiveTab] = useState("MODELS");
   const controlsRef = useRef(null);
-
   // Fetch scraped data
   useEffect(() => {
-    const fetchFurnitureData = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/products");
-        const data = await response.json();
+    fetch('http://localhost:5000/products')
+      .then(response => response.json())
+      .then(data => {
         setFurnitureItems(data);
-      } catch (error) {
-        console.error("Error fetching furniture data:", error);
-      }
-    };
-
-    fetchFurnitureData();
+      })
+      .catch(error => {
+        console.error('Error fetching products:', error);
+      });
   }, []);
 
   useEffect(() => {
@@ -232,9 +210,11 @@ const FloorPlan3D = () => {
           </div>
 
           <div className="furniture-grid">
-            {furnitureItems.map((product) => (
-              <FurnitureCard key={product.id} product={product} />
-            ))}
+            {
+              activeTab === 'FURNITURE'
+              &&
+              <FurnitureGrid products = {furnitureItems}/>
+            }
           </div>
         </div>
       </div>
@@ -243,3 +223,5 @@ const FloorPlan3D = () => {
 };
 
 export default FloorPlan3D;
+
+

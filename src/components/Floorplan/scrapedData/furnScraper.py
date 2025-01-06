@@ -8,13 +8,13 @@ from fake_useragent import UserAgent
 import json
 
 app = Flask(__name__)
-CORS(app)  # Enable Cross-Origin Resource Sharing for React app
+CORS(app)
 
-# Scraper Class
 class PepperfryScraper:
     def __init__(self):
         self.session = requests.Session()
         self.ua = UserAgent()
+        self.base_domain = "https://www.pepperfry.com"
 
     def get_random_headers(self):
         return {
@@ -48,13 +48,12 @@ class PepperfryScraper:
 
     def extract_product_data(self, card):
         try:
+            product_link = card.select_one("a.product-card-link")
             data = {
                 'name': card.select_one("h2.product-name").text.strip() if card.select_one("h2.product-name") else "N/A",
-                'price': card.select_one("span.product-offer-price").text.strip() if card.select_one("span.product-offer-price") else "N/A",
                 'image_url': card.select_one("img")['src'].strip() if card.select_one("img") else "N/A",
                 'mrp': card.select_one("span.product-mrp-price").text.strip() if card.select_one("span.product-mrp-price") else "N/A",
-                'discount': card.select_one("span.product-discount").text.strip() if card.select_one("span.product-discount") else "N/A",
-                'emi': card.select_one("div.product-emi").text.strip() if card.select_one("div.product-emi") else "N/A"
+                'url': self.base_domain + product_link['href'] if product_link and 'href' in product_link.attrs else "N/A"
             }
             return data
         except Exception as e:
@@ -90,7 +89,6 @@ class PepperfryScraper:
 
         return all_products
 
-
 @app.route('/scrape', methods=['POST'])
 def scrape_data():
     base_url = request.json.get('base_url', "https://www.pepperfry.com/site_product/search?q=furniture")
@@ -101,7 +99,6 @@ def scrape_data():
         json.dump(products, f, indent=4)
     return jsonify({'message': 'Data scraped successfully!', 'product_count': len(products)})
 
-
 @app.route('/products', methods=['GET'])
 def get_products():
     try:
@@ -110,7 +107,6 @@ def get_products():
         return jsonify(products)
     except FileNotFoundError:
         return jsonify({'error': 'No data found. Please scrape first using /scrape endpoint.'}), 404
-
 
 if __name__ == '__main__':
     app.run(debug=True)

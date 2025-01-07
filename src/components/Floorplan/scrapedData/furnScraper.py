@@ -11,10 +11,13 @@ app = Flask(__name__)
 CORS(app)
 
 class PepperfryScraper:
-    def __init__(self):
+    def __init__(self, scraper_api_key):
         self.session = requests.Session()
         self.ua = UserAgent()
+        self.scraper_api_key = scraper_api_key
         self.base_domain = "https://www.pepperfry.com"
+        self.scraper_api_url = "http://api.scraperapi.com/?api_key=fe8f2f36f037fbb0a6e0d0b067994e9c&url=https%3A%2F%2Fwww.pepperfry.com"
+
 
     def get_random_headers(self):
         return {
@@ -28,17 +31,22 @@ class PepperfryScraper:
             'DNT': '1'
         }
 
-    def fetch_page(self, url, retries=3):
+    def fetch_page(self, url, retries=10):
         for attempt in range(retries):
             try:
-                time.sleep(random.uniform(2, 5))
+                time.sleep(random.uniform(2, 5))  # Add a delay to avoid detection
                 response = self.session.get(
-                    url,
+                    self.scraper_api_url,
+                    params={
+                        'api_key': self.scraper_api_key,
+                        'url': url,
+                    },
                     headers=self.get_random_headers(),
                     timeout=30
                 )
                 if response.status_code == 200:
                     return response
+                print(f"Non-200 status code received: {response.status_code}")
                 time.sleep(random.uniform(5, 10))
             except Exception as e:
                 print(f"Error on attempt {attempt + 1}: {str(e)}")
@@ -69,12 +77,14 @@ class PepperfryScraper:
 
             response = self.fetch_page(url)
             if not response:
+                print("Failed to fetch page. Stopping scraping.")
                 break
 
             soup = BeautifulSoup(response.text, 'html.parser')
             product_cards = soup.select(".product-card-container")
 
             if not product_cards:
+                print("No product cards found. Stopping scraping.")
                 break
 
             for card in product_cards:
@@ -92,7 +102,11 @@ class PepperfryScraper:
 @app.route('/scrape', methods=['POST'])
 def scrape_data():
     base_url = request.json.get('base_url', "https://www.pepperfry.com/site_product/search?q=furniture")
-    scraper = PepperfryScraper()
+    scraper_api_key = request.json.get('fe8f2f36f037fbb0a6e0d0b067994e9c', '')  # Provide ScraperAPI key here
+    if not scraper_api_key:
+        return jsonify({'error': 'ScraperAPI key is required'}), 400
+
+    scraper = PepperfryScraper(scraper_api_key)
     max_products = 500
     products = scraper.scrape_products(base_url, max_products)
     with open('./products.json', 'w') as f:

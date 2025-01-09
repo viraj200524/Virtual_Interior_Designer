@@ -1,1 +1,0 @@
-2018_flat_screen_tv

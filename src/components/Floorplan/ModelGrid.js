@@ -7,7 +7,7 @@ const ModelGrid = ({ apiKey, query, onModelSelect }) => {
     const fetchModels = async () => {
       try {
         const response = await fetch(
-          `https://api.sketchfab.com/v3/search?type=models&q=${query}`,
+          `https://api.sketchfab.com/v3/search?type=models&q=${query}&downloadable=true`,
           {
             headers: {
               Authorization: `Token ${apiKey}`,
@@ -25,7 +25,7 @@ const ModelGrid = ({ apiKey, query, onModelSelect }) => {
   }, [apiKey, query]);
 
   const handleModelSelect = (model) => {
-    onModelSelect(model.uid);
+    onModelSelect(model.uid); // Pass the model UID to the parent component
   };
 
   return (
@@ -64,6 +64,6 @@ const ModelGrid = ({ apiKey, query, onModelSelect }) => {
       </div>
     </div>
   );
-}
+};
 
-export default ModelGrid
+export default ModelGrid;

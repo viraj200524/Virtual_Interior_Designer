@@ -1,1 +1,0 @@
-Wooden cupboard with door

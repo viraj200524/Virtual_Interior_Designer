@@ -1,12 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import * as THREE from "three";
-import { OrbitControls } from "three-stdlib";
-import Sofa from "../Furniture/Sofa.js";
-import { GLTFLoader } from "three-stdlib";
+import { OrbitControls, DragControls } from "three-stdlib";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import "./Floorplan3d.css";
 import FurnitureGrid from "./FurnitureGrid.js";
-
+import ModelGrid from "./ModelGrid.js";
 
 const FloorPlan3D = () => {
   const mountRef = useRef(null);
@@ -14,21 +13,130 @@ const FloorPlan3D = () => {
   const [sceneObjects, setSceneObjects] = useState(null);
   const [furnitureItems, setFurnitureItems] = useState([]);
   const [activeTab, setActiveTab] = useState("MODELS");
-  const controlsRef = useRef(null);
-  // Fetch scraped data
-  useEffect(() => {
-    fetch('http://localhost:5000/products')
-      .then(response => response.json())
-      .then(data => {
-        setFurnitureItems(data);
-      })
-      .catch(error => {
-        console.error('Error fetching products:', error);
-      });
-  }, []);
+  const controlsRef = useRef(null); // For floorplan controls
+  const [selectedModel, setSelectedModel] = useState(null);
+  const currentModelRef = useRef(null);
+  const dragControlsRef = useRef(null); // For furniture dragging
+  const furnitureControlsRef = useRef(null); // For furniture rotation
+  const [floorplanBounds, setFloorplanBounds] = useState({
+    minX: -Infinity,
+    maxX: Infinity,
+    minZ: -Infinity,
+    maxZ: Infinity,
+  });
 
+  // Load and render the selected model
   useEffect(() => {
-    // Scene setup (No changes here)
+    if (selectedModel && sceneObjects) {
+      const fetchModelDetails = async () => {
+        try {
+          // Fetch model download information
+          const downloadResponse = await fetch(
+            `https://api.sketchfab.com/v3/models/${selectedModel}/download`,
+            {
+              headers: {
+                Authorization: "Token 9d2379512bd84812beb65f0ffe608310", // Replace with your API key
+              },
+            }
+          );
+          const downloadData = await downloadResponse.json();
+          const glbUrl = downloadData.glb.url; // Get the GLB URL
+
+          if (glbUrl) {
+            loadModel(glbUrl); // Load the model using the GLB URL
+          } else {
+            console.error("GLB URL not found in model download information");
+          }
+        } catch (error) {
+          console.error("Error fetching model download information:", error);
+        }
+      };
+
+      fetchModelDetails();
+    }
+  }, [selectedModel, sceneObjects]);
+
+  const loadModel = (url) => {
+    const loader = new GLTFLoader();
+    loader.load(
+      url,
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Remove previous model if it exists
+        if (currentModelRef.current) {
+          sceneObjects.scene.remove(currentModelRef.current);
+        }
+
+        // Calculate bounding box
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+
+        // Scale model to reasonable size
+        const scale = 100 / size.y;
+        model.scale.set(scale, scale, scale);
+
+        // Position model at center of floor
+        model.position.set(0, 0, 0);
+
+        // Add model to scene
+        sceneObjects.scene.add(model);
+        currentModelRef.current = model;
+
+        // Make model draggable
+        if (dragControlsRef.current) {
+          dragControlsRef.current.dispose(); // Clean up previous drag controls
+        }
+        dragControlsRef.current = new DragControls(
+          [model],
+          sceneObjects.camera,
+          sceneObjects.renderer.domElement
+        );
+
+        // Disable floorplan controls while dragging
+        dragControlsRef.current.addEventListener("dragstart", () => {
+          if (controlsRef.current) {
+            controlsRef.current.enabled = false;
+          }
+        });
+
+        dragControlsRef.current.addEventListener("dragend", () => {
+          if (controlsRef.current) {
+            controlsRef.current.enabled = true;
+          }
+        });
+
+        // Enable rotation on right-click
+        if (furnitureControlsRef.current) {
+          furnitureControlsRef.current.dispose(); // Clean up previous furniture controls
+        }
+        furnitureControlsRef.current = new OrbitControls(
+          model,
+          sceneObjects.renderer.domElement
+        );
+        furnitureControlsRef.current.enabled = false; // Disable by default
+
+        // Enable rotation on right-click
+        sceneObjects.renderer.domElement.addEventListener("mousedown", (event) => {
+          if (event.button === 2) {
+            // Right-click
+            furnitureControlsRef.current.enabled = true;
+            const deltaX = event.movementX;
+            model.rotation.y += deltaX * 0.02;
+          }
+        });
+
+        sceneObjects.renderer.domElement.addEventListener("mouseup", () => {
+          furnitureControlsRef.current.enabled = false;
+        });
+      },
+      undefined,
+      (error) => console.error("Error loading model:", error)
+    );
+  };
+
+  // Initialize Three.js scene
+  useEffect(() => {
     const walls = location.state?.layout || [];
     if (!walls.length) {
       console.warn("No walls data received");
@@ -120,6 +228,14 @@ const FloorPlan3D = () => {
     floor.position.set(0, 0, 0);
     scene.add(floor);
 
+    // Set floorplan bounds for model movement
+    setFloorplanBounds({
+      minX: -floorWidth / 2,
+      maxX: floorWidth / 2,
+      minZ: -floorDepth / 2,
+      maxZ: floorDepth / 2,
+    });
+
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
@@ -144,6 +260,9 @@ const FloorPlan3D = () => {
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
+      if (furnitureControlsRef.current) {
+        furnitureControlsRef.current.update();
+      }
       renderer.render(scene, camera);
     };
     animate();
@@ -160,6 +279,7 @@ const FloorPlan3D = () => {
       );
     };
     window.addEventListener("resize", handleResize);
+    
 
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -184,25 +304,19 @@ const FloorPlan3D = () => {
         <div className="furniture-section">
           <div className="furniture-header">
             <button
-              className={`header-button ${
-                activeTab === "MODELS" ? "active" : ""
-              }`}
+              className={`header-button ${activeTab === "MODELS" ? "active" : ""}`}
               onClick={() => setActiveTab("MODELS")}
             >
               MODELS
             </button>
             <button
-              className={`header-button ${
-                activeTab === "FURNITURE" ? "active" : ""
-              }`}
+              className={`header-button ${activeTab === "FURNITURE" ? "active" : ""}`}
               onClick={() => setActiveTab("FURNITURE")}
             >
               FURNITURE
             </button>
             <button
-              className={`header-button ${
-                activeTab === "PAINT" ? "active" : ""
-              }`}
+              className={`header-button ${activeTab === "PAINT" ? "active" : ""}`}
               onClick={() => setActiveTab("PAINT")}
             >
               PAINT
@@ -210,11 +324,14 @@ const FloorPlan3D = () => {
           </div>
 
           <div className="furniture-grid">
-            {
-              activeTab === 'FURNITURE'
-              &&
-              <FurnitureGrid products = {furnitureItems}/>
-            }
+            {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} />}
+            {activeTab === "MODELS" && (
+              <ModelGrid
+                apiKey="9d2379512bd84812beb65f0ffe608310"
+                query="cupboard"
+                onModelSelect={setSelectedModel}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -223,5 +340,3 @@ const FloorPlan3D = () => {
 };
 
 export default FloorPlan3D;
-
-

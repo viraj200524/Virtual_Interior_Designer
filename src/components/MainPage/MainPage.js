@@ -1,47 +1,43 @@
 import React, { useState } from 'react';
 import { Search, User, Plus } from 'lucide-react';
 import './MainPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import RoomCard from './RoomCard';
 import { useAuth0 } from '@auth0/auth0-react';
 import LogoutButton from '../Login-in/LogoutButton';
+import RoomQuiz from'../RoomQuiz/RoomQuiz';
 
 // NavLink Component
-function NavLink({ children }) {
+function NavLink({ children, to }) {
   return (
-    <a href="/" className="nav-link">
+    <Link to={to} className="nav-link">
       {children}
-    </a>
+    </Link>
   );
 }
 
 // Navigation Component
 function Navigation() {
-
   return (
     <nav className="nav">
       <div className="nav-content">
         <div className="nav-left">
           <h1 className="logo">Decora</h1>
           <div className="nav-links">
-            <NavLink>Design</NavLink>
-            <NavLink>Products</NavLink>
+            <NavLink to="/">Design</NavLink>
+            <NavLink to="/products">Products</NavLink>
+            <NavLink to="/room-quiz">RoomQuiz</NavLink>
           </div>
         </div>
-        
         <div className="nav-right">
           <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search"
-              className="search-input"
-            />
+            <input type="text" placeholder="Search" className="search-input" />
             <Search className="search-icon" />
           </div>
           <button className="profile-button">
             <User className="profile-icon" />
           </button>
-          <LogoutButton/>
+          <LogoutButton />
         </div>
       </div>
     </nav>
@@ -83,8 +79,8 @@ function AddRoomModal({ isOpen, onClose, onAdd }) {
 
 // Main Page Component
 function MainPage() {
-  const {user} = useAuth0()
-  const navigate = useNavigate()
+  const { user } = useAuth0();
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState(['Living Room', 'Bedroom', 'Kitchen']);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -93,39 +89,38 @@ function MainPage() {
   };
 
   const handleDeleteRoom = (roomName) => {
-    setRooms(rooms.filter(room => room !== roomName));
+    setRooms(rooms.filter((room) => room !== roomName));
   };
 
-  
+  // const handleRoomQuizNavigation = () => {
+  //   navigate('/room-quiz');
+  // };
+
   return (
     <div className="container">
       <Navigation />
-      
+
       <main className="main">
         <div className="welcome-section">
-          <h2 className="welcome-title">Hello {user?.name || "Guest"}</h2>
+          <h2 className="welcome-title">Hello {user?.name || 'Guest'}</h2>
           <p className="welcome-text">Let's start building your dream space</p>
         </div>
 
         <div className="home-section">
           <h3 className="section-title">MY HOME</h3>
           <div className="rooms-container">
-            <RoomCard 
-              isAdd={true} 
-              onAdd={() => setIsModalOpen(true)} 
-            />
+            <RoomCard isAdd={true} onAdd={() => setIsModalOpen(true)} />
             {rooms.map((room) => (
-              <RoomCard 
-                key={room}
-                title={room}
-                onDelete={handleDeleteRoom}
-              />
+              <RoomCard key={room} title={room} onDelete={handleDeleteRoom} />
             ))}
           </div>
+          {/* <button className="quiz-button" onClick={handleRoomQuizNavigation}>
+            Start Room Quiz
+          </button> */}
         </div>
       </main>
 
-      <AddRoomModal 
+      <AddRoomModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddRoom}

@@ -1,7 +1,7 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f5f5dc; /* Light beige to complement #CD853F */
+    background-color: #f8ebd8; /* Light beige to complement #CD853F */
     color: #333; /* Dark text for readability */
   }
   
@@ -10,7 +10,7 @@ body {
     color: #CD853F;
   }
   
-  button {
+  /* button {
     background-color: #CD853F;
     border: none;
     color: white;
@@ -23,8 +23,8 @@ body {
   }
   
   button:hover {
-    background-color: #b37730; /* Slightly darker shade */
-  }
+    background-color: #b37730; 
+  } */
   
   button:active {
     background-color: #8f5e25; /* Even darker shade */

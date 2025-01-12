@@ -7,13 +7,13 @@ function AddRoomModal({ isOpen, onClose, onAdd }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (roomName.trim()) {
-      onAdd(roomName.trim());
+      onAdd(roomName.trim());  // Call the onAdd function from MainPage
       setRoomName('');
-      onClose();
+      onClose();  // Close the modal
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) return null;  // If the modal is not open, return null
 
   return (
     <div className="modal-overlay">
@@ -39,3 +39,5 @@ function AddRoomModal({ isOpen, onClose, onAdd }) {
     </div>
   );
 }
+
+export default AddRoomModal;

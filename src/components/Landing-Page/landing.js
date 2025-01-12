@@ -18,7 +18,7 @@ import LoginButton from "../Login-in/LoginButton";
 import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
-  const navigate = useNavigate(); // Initialize navigate function
+  const navigate = useNavigate(); 
 
   const testimonials = [
     {
@@ -68,25 +68,38 @@ const Landing = () => {
     },
   ];
 
-  const { isAuthenticated } = useAuth0(); // Auth0 hook for authentication
+  const { isAuthenticated } = useAuth0(); 
 
   return (
     <>
       <div className="landing-container">
         <div className="hero-section">
           <nav className="navbar">
-            <div className="logo">Decora</div>
+            <div className="main_title">Decora</div>
             <div className="nav-links">
-              <a href="#about">About</a>
               <a href="#features">Features</a>
-              <button className="login-btn">
+              <a href="#contact-us">Contact Us</a>
+              {/* <button>
+                {isAuthenticated ? <LogoutButton /> : <LoginButton />}
+              </button> */}
+              <button className="lgnbtn"
+                style={{
+                  backgroundColor: "transperant",
+                  border: "1px solid #cd853f",
+                  borderRadius: "5px", 
+                  padding: "10px 20px",
+                  color: "#cd853f", 
+                  fontSize: "4px", 
+                  cursor: "pointer", 
+                  
+                }}
+              >
                 {isAuthenticated ? <LogoutButton /> : <LoginButton />}
               </button>
             </div>
           </nav>
         </div>
 
-        {/* Hero Section */}
         <div className="hero-content">
           <div className="hero-text">
             <h1>Transform Your Space within minutes...</h1>
@@ -107,9 +120,25 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Testimonials Section */}
+      <div className="features-section" id="features">
+        <h2>
+          <b>Features</b>
+        </h2>
+        <div className="features-container">
+          {features.map((feature, index) => (
+            <div key={index} className="feature-card">
+              {feature.icon}
+              <h3 className="feature-title">{feature.title}</h3>
+              <p className="feature-description">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <hr class="section-divider" />
       <div className="testimonials-section">
-        <h2>What People Say</h2>
+        <h2>
+          <b>What People Say</b>
+        </h2>
         <div className="testimonials-container">
           {testimonials.map((testimonial, index) => (
             <div key={index} className="testimonial-card">
@@ -128,25 +157,12 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="features-section">
-        <h2>Features</h2>
-        <div className="features-container">
-          {features.map((feature, index) => (
-            <div key={index} className="feature-card">
-              {feature.icon}
-              <h3 className="feature-title">{feature.title}</h3>
-              <p className="feature-description">{feature.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Contact Section */}
-      <div className="contact-section">
+      <div className="contact-section" id="contact-us">
         <div className="contact-container">
           <div className="contact-info">
-            <h2>Contact Us</h2>
+            <h2>
+              <b>Contact Us</b>
+            </h2>
             <div className="contact-item">
               <Phone className="contact-icon" />
               <span className="contact-text">+91 12345 67890</span>

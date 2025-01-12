@@ -109,6 +109,7 @@ const FloorPlan3D = () => {
           const modelGroup = new THREE.Group();
           modelGroup.add(model);
           sceneObjects.scene.add(modelGroup);
+          modelGroup.position.set(0, 50, 0); // Lift it slightly above the floor
 
           // Remove previous model if it exists
           if (currentModelRef.current) {
@@ -471,7 +472,6 @@ const FloorPlan3D = () => {
             {activeTab === "MODELS" && (
               <ModelGrid
                 apiKey="9d2379512bd84812beb65f0ffe608310"
-                query="sofa"
                 onModelSelect={setSelectedModel}
               />
             )}

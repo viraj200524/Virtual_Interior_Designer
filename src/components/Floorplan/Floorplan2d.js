@@ -2,6 +2,8 @@ import React, { useState, useRef} from "react";
 import { Stage, Layer, Line, Text } from "react-konva";
 import { useNavigate } from "react-router-dom";
 import './Floorplan2d.css'
+import Konva from 'konva';
+
 
 const GRID_SIZE = 20;
 
@@ -93,6 +95,42 @@ const FloorPlan = () => {
     navigate("/floorplan3d", { state: { layout: walls } }); // Passing walls as 'layout' to 3D view
   };
 
+  const handleSave = () => {
+    const stage = stageRef.current;
+  
+    // Find the grid layer and hide it before exporting
+    const gridLayer = stage.findOne('.grid-layer');
+    if (gridLayer) gridLayer.visible(false);
+  
+    // Create a temporary white rectangle as the background
+    const backgroundLayer = new Konva.Rect({
+      width: stage.width(),
+      height: stage.height(),
+      fill: 'white',
+    });
+    stage.getLayers()[0].add(backgroundLayer);
+    backgroundLayer.moveToBottom();
+  
+    // Export the stage to an image
+    const uri = stage.toDataURL({
+      mimeType: 'image/png',
+      pixelRatio: 2, // Increase pixel ratio for higher quality
+    });
+  
+    // Cleanup: Remove temporary background and revert visibility of grid
+    backgroundLayer.destroy();
+    if (gridLayer) gridLayer.visible(true);
+  
+    // Trigger the download
+    const link = document.createElement('a');
+    link.href = uri;
+    link.download = 'floorplan.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  
   return (
     <div>
       <h1>2D Floor Plan Builder</h1>
@@ -109,6 +147,12 @@ const FloorPlan = () => {
           <option value="feet">Feet</option>
           <option value="meters">Meters</option>
         </select>
+        <button
+          style={{ position: "absolute", top: "10px", right: "80px" }}
+          onClick={handleSave}
+        >
+          Save
+        </button>
         <button
           style={{ position: "absolute", top: "10px", right: "10px" }}
           onClick={handleDone}

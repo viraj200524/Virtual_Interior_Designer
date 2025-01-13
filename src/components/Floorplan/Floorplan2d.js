@@ -1,24 +1,26 @@
-import React, { useState, useRef} from "react";
+import React, { useState, useRef } from "react";
 import { Stage, Layer, Line, Text } from "react-konva";
 import { useNavigate } from "react-router-dom";
+import './Floorplan2d.css';
+import LogoutButton from '../Login-in/LogoutButton';
+import { Search, User } from 'lucide-react';
 import './Floorplan2d.css'
 import Konva from 'konva';
 
 
 const GRID_SIZE = 20;
+const WALL_THICKNESS = 3;
 
 const FloorPlan = () => {
-  const [walls, setWalls] = useState([]); // Array of walls (lines)
+  const [walls, setWalls] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [tool, setTool] = useState("draw"); // Tool selection: draw, move, delete
-  const [unit, setUnit] = useState("feet"); // Default unit is feet
+  const [tool, setTool] = useState("draw");
+  const [unit, setUnit] = useState("feet");
   const stageRef = useRef();
   const navigate = useNavigate();
 
-  // Conversion factor
   const conversionFactor = unit === "feet" ? 1 : 0.3048;
 
-  // Create grid lines
   const createGrid = (width, height, gridSize) => {
     const gridLines = [];
     for (let i = 0; i <= width / gridSize; i++) {
@@ -26,8 +28,9 @@ const FloorPlan = () => {
         <Line
           key={`v-${i}`}
           points={[i * gridSize, 0, i * gridSize, height]}
-          stroke="#ddd"
-          strokeWidth={1}
+          stroke="#E6D5C3"
+          strokeWidth={0.5}
+          dash={[2, 4]}
         />
       );
     }
@@ -36,48 +39,45 @@ const FloorPlan = () => {
         <Line
           key={`h-${i}`}
           points={[0, i * gridSize, width, i * gridSize]}
-          stroke="#ddd"
-          strokeWidth={1}
+          stroke="#E6D5C3"
+          strokeWidth={0.5}
+          dash={[2, 4]}
         />
       );
     }
     return gridLines;
   };
 
-  // Start drawing a wall
+  const snapToGrid = (x, y) => ({
+    x: Math.round(x / GRID_SIZE) * GRID_SIZE,
+    y: Math.round(y / GRID_SIZE) * GRID_SIZE,
+  });
+
   const handleMouseDown = (e) => {
     if (tool !== "draw") return;
-
     const pos = e.target.getStage().getPointerPosition();
-    const snappedX = Math.round(pos.x / GRID_SIZE) * GRID_SIZE;
-    const snappedY = Math.round(pos.y / GRID_SIZE) * GRID_SIZE;
-
-    setWalls([...walls, { points: [snappedX, snappedY, snappedX, snappedY] }]);
+    const snapped = snapToGrid(pos.x, pos.y);
+    setWalls([...walls, { points: [snapped.x, snapped.y, snapped.x, snapped.y] }]);
     setIsDrawing(true);
   };
 
-  // Update the endpoint of the wall while dragging
   const handleMouseMove = (e) => {
     if (!isDrawing || tool !== "draw") return;
-
     const pos = e.target.getStage().getPointerPosition();
-    const snappedX = Math.round(pos.x / GRID_SIZE) * GRID_SIZE;
-    const snappedY = Math.round(pos.y / GRID_SIZE) * GRID_SIZE;
-
+    const snapped = snapToGrid(pos.x, pos.y);
     const updatedWalls = [...walls];
-    updatedWalls[updatedWalls.length - 1].points[2] = snappedX;
-    updatedWalls[updatedWalls.length - 1].points[3] = snappedY;
+    const currentWall = updatedWalls[updatedWalls.length - 1];
+    currentWall.points[2] = snapped.x;
+    currentWall.points[3] = snapped.y;
     setWalls(updatedWalls);
   };
 
-  // Finalize the wall
   const handleMouseUp = () => {
     if (isDrawing && tool === "draw") {
       setIsDrawing(false);
     }
   };
 
-  // Select a wall for deletion or moving
   const handleWallClick = (index) => {
     if (tool === "delete") {
       const updatedWalls = walls.filter((_, i) => i !== index);
@@ -97,30 +97,42 @@ const FloorPlan = () => {
 
   const handleSave = () => {
     const stage = stageRef.current;
-  
+
     // Find the grid layer and hide it before exporting
     const gridLayer = stage.findOne('.grid-layer');
     if (gridLayer) gridLayer.visible(false);
-  
+
     // Create a temporary white rectangle as the background
     const backgroundLayer = new Konva.Rect({
-      width: stage.width(),
-      height: stage.height(),
-      fill: 'white',
+        width: stage.width(),
+        height: stage.height(),
+        fill: 'white',
     });
     stage.getLayers()[0].add(backgroundLayer);
     backgroundLayer.moveToBottom();
-  
+
+    // Create a temporary Konva Text node for "Decora"
+    const decoraText = new Konva.Text({
+        text: 'Decora',
+        fontSize: 25,
+        fontFamily: 'Playfair Display', 
+        fill: '#8B4513',
+        x: stage.width() - 100, // Adjust the position as needed
+        y: stage.height() - 30, // Adjust the position as needed
+    });
+    stage.getLayers()[0].add(decoraText);
+
     // Export the stage to an image
     const uri = stage.toDataURL({
-      mimeType: 'image/png',
-      pixelRatio: 2, // Increase pixel ratio for higher quality
+        mimeType: 'image/png',
+        pixelRatio: 2, // Increase pixel ratio for higher quality
     });
-  
-    // Cleanup: Remove temporary background and revert visibility of grid
+
+    // Cleanup: Remove temporary background and text node, and revert visibility of grid
     backgroundLayer.destroy();
+    decoraText.destroy();
     if (gridLayer) gridLayer.visible(true);
-  
+
     // Trigger the download
     const link = document.createElement('a');
     link.href = uri;
@@ -128,84 +140,115 @@ const FloorPlan = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+};
   
   
+
   return (
-    <div>
-      <h1>2D Floor Plan Builder</h1>
-      <div style={{ marginBottom: "10px" }}>
-        <button onClick={() => setTool("draw")}>Draw Walls</button>
-        <button onClick={() => setTool("move")}>Move Walls</button>
-        <button onClick={() => setTool("delete")}>Delete Walls</button>
-        <button onClick={handleClearLayout}>Clear Layout</button>
-        <select
-          value={unit}
-          onChange={(e) => setUnit(e.target.value)}
-          style={{ marginLeft: "10px" }}
-        >
-          <option value="feet">Feet</option>
-          <option value="meters">Meters</option>
-        </select>
-        <button
-          style={{ position: "absolute", top: "10px", right: "80px" }}
-          onClick={handleSave}
-        >
-          Save
-        </button>
-        <button
-          style={{ position: "absolute", top: "10px", right: "10px" }}
-          onClick={handleDone}
-        >
-          Done
-        </button>
+    <div className="floorplan-container">
+      <nav className="nav">
+        <div className="nav-content">
+          <div className="nav-left">
+            <h1 className="logo">Decora</h1>
+            <div className="nav-links">
+              <a href="/">Design</a>
+              <a href="/products">Products</a>
+              <a href="/budget-estimator">Budget Estimator</a>
+            </div>
+          </div>
+          <div className="nav-right">
+            <div className="search-container">
+              <input type="text" placeholder="Search" className="search-input" />
+              <Search className="search-icon" />
+            </div>
+            <button className="profile-button">
+              <User className="profile-icon" />
+            </button>
+            <LogoutButton />
+          </div>
+        </div>
+      </nav>
+
+      <div className="content">
+        <h2 className="header-text">Draw the 2D Layout of your room in the grid below</h2>
+        <div className="toolbox">
+          <button
+            onClick={() => setTool("draw")}
+            className={`tool-button ${tool === "draw" ? "active" : ""}`}
+          >
+            Draw Wall
+          </button>
+          <button
+            onClick={() => setTool("delete")}
+            className={`tool-button ${tool === "delete" ? "active" : ""}`}
+          >
+            Delete Wall
+          </button>
+          <select
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            className="tool-select"
+          >
+            <option value="feet">Feet</option>
+            <option value="meters">Meters</option>
+          </select>
+          <button onClick={() => setWalls([])} className="tool-button">
+            Clear All
+          </button>
+          <button
+            onClick={handleSave}
+            className="tool-button"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => navigate("/floorplan3d", { state: { layout: walls } })}
+            className="tool-button submit-button"
+          >
+            Submit
+          </button>
+        </div>
+
+        <div className="grid-container">
+          <Stage
+            width={window.innerWidth - 100}
+            height={600}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            ref={stageRef}
+          >
+            <Layer>
+              {createGrid(window.innerWidth - 100, 600, GRID_SIZE)}
+              {walls.map((wall, index) => (
+                <React.Fragment key={index}>
+                  <Line
+                    points={wall.points}
+                    stroke={tool === "delete" ? "#B22222" : "#8B4513"}
+                    strokeWidth={WALL_THICKNESS}
+                    onClick={() => handleWallClick(index)}
+                  />
+                  <Text
+                    x={(wall.points[0] + wall.points[2]) / 2}
+                    y={(wall.points[1] + wall.points[3]) / 2 - 15}
+                    text={`${(
+                      Math.sqrt(
+                        (wall.points[2] - wall.points[0]) ** 2 +
+                        (wall.points[3] - wall.points[1]) ** 2
+                      ) /
+                      GRID_SIZE *
+                      conversionFactor
+                    ).toFixed(1)} ${unit}`}
+                    fontSize={12}
+                    fill="#8B4513"
+                  />
+                </React.Fragment>
+              ))}
+            </Layer>
+          </Stage>
+        </div>
+
       </div>
-      <Stage
-        width={window.innerWidth}
-        height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        ref={stageRef}
-      >
-        <Layer>
-          {/* Grid */}
-          {createGrid(window.innerWidth, window.innerHeight, GRID_SIZE)}
-
-          {/* Draw walls */}
-          {walls.map((wall, index) => (
-            <Line
-              key={index}
-              points={wall.points}
-              stroke="black"
-              strokeWidth={3}
-              draggable={tool === "move"}
-              onClick={() => handleWallClick(index)}
-            />
-          ))}
-
-          {/* Display wall dimensions */}
-          {walls.map((wall, index) => {
-            const x1 = wall.points[0];
-            const y1 = wall.points[1];
-            const x2 = wall.points[2];
-            const y2 = wall.points[3];
-            const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-            const convertedDistance = (distance / GRID_SIZE) * conversionFactor;
-
-            return (
-              <Text
-                key={`dimension-${index}`}
-                x={(x1 + x2) / 2}
-                y={(y1 + y2) / 2 - 20}
-                text={`${convertedDistance.toFixed(1)} ${unit}`}
-                fontSize={14}
-                fill="blue"
-              />
-            );
-          })}
-        </Layer>
-      </Stage>
     </div>
   );
 };

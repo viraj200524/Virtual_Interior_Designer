@@ -24,7 +24,7 @@ function App() {
             <Route path="/main-page" element={<MainPage />} />
             <Route path="/floorplan2d" element={<Floorplan2d />} />
             <Route path="/floorplan3d" element={<FloorPlan3d />} />
-            <Route path="/room-quiz" element={<RoomQuiz />} />
+            <Route path="/budget-estimator" element={<RoomQuiz />} />
           </Routes>
         </div>
       </Auth0Provider>

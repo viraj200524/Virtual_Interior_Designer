@@ -23,7 +23,7 @@ function Navigation() {
             <div className="nav-links">
               <NavLink to="/">Design</NavLink>
               <NavLink to="/products">Products</NavLink>
-              <NavLink to="/room-quiz">RoomQuiz</NavLink>
+              <a href="/budget-estimator">Budget Estimator</a>
             </div>
           </div>
           <div className="nav-right">

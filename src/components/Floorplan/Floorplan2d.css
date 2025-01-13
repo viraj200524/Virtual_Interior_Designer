@@ -24,88 +24,68 @@
 }
 
 /* Button and input focus states */
-button:focus, 
-input:focus, 
+button:focus,
+input:focus,
 select:focus {
   outline: 2px solid #CD853F;
   outline-offset: 2px;
 }
 
 /* Smooth transitions */
-button, 
-select, 
+button,
+select,
 input {
   transition: all 0.2s ease-in-out;
 }
 
 /* Canvas container */
-.konvajs-content {
-  background: #ffffff;
+.canvas-container {
+  border: 2px solid #8B4513;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 auto;
+  width: calc(100% - 100px);
+  background: white;
+  margin-bottom: 80px;
 }
 
-/* Dimensions text */
-.konvajs-content text {
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-/* Center the grid area and buttons/text above it */
-/* Center the grid area and buttons/text above it */
-.grid-section {
+/* Toolbar */
+.toolbar {
+  
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  height: 100vh; /* Full height of the viewport */
-  gap: 20px; /* Space between elements */
-  text-align: center; /* Align text to the center */
-  padding: 0 20px; /* Add padding around the grid */
-  box-sizing: border-box;
+  padding: 10px;
+  background-color: #dbb193;
+  border-bottom: 2px solid #8B4513;
 }
 
-
-/* Header Text */
-.header-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 600;
-  color: #8B4513;
-  margin-top: 20px;
-  margin-bottom: 20px;
+.toolbar-left {
   display: flex;
-  justify-content: center;
-}
-
-
-/* Toolbox for buttons */
-.toolbox {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Space between the left and right buttons */
   gap: 10px;
-  width: 100%;
-  padding: 0 20px; /* Adjust padding to create space on the sides */
-  box-sizing: border-box; /* Ensure padding doesn't overflow */
+  align-items: center;
 }
 
+.toolbar-right {
+  margin-left: auto;
+}
 
-.tool-button, .tool-select {
-  padding: 12px 18px; /* Adjust padding for better spacing */
+/* Tool buttons */
+.tool-button,
+.tool-select {
+  
+  padding: 8px 16px;
   border: 1px solid #8B4513;
-  border-radius: 20px; /* Rounded edges */
+  border-radius: 10px;
   background-color: #EED9C4;
   color: #8B4513;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 14px; /* Adjust font size to fit inside buttons */
-}
-
-.toolbox .submit-button {
-  margin-left: auto; /* Push the submit button to the right */
+  font-size: 14px;
 }
 
 .tool-button.active {
   background-color: #8B4513;
-  color: #fff;
+  color: white;
 }
 
 .tool-button:hover {
@@ -113,30 +93,45 @@ input {
   color: white;
 }
 
-/* Center the grid container */
-.grid-container {
-  position: relative;
-  margin-top: 20px;
-  border: 2px solid #8B4513;
-  border-radius: 20px; /* Rounded edges */
-  overflow: hidden;
-  background-color: #FAF3E0; /* Light cream background */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for aesthetics */
-  width: 85%; /* Adjust width to fit the design */
-  height: 50%; /* Adjust height to fit the design */
+/* Submit button */
+.submit-button {
+  padding: 8px 16px;
+  border: 1px solid #8B4513;
+  border-radius: 10px;
+  background-color: #8B4513;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-left: 95px;
+  gap: 8px;
 }
 
-/* Decora text at the bottom-right of the grid container */
-.grid-footer {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  color: #8B4513;
-  font-size: 25px;
+.submit-button:hover {
+  background-color: #CD853F;
+}
+
+.submit-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Header Text */
+.header-text {
   font-family: 'Playfair Display', serif;
+  font-size: 24px;
   font-weight: 600;
+  color: #8B4513;
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 40px;
+}
+
+/* Konva specific styles */
+.konvajs-content {
+  background: #ffffff;
+}
+
+.konvajs-content text {
+  font-family: system-ui, -apple-system, sans-serif;
 }

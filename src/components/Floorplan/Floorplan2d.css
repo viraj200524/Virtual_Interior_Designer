@@ -1,83 +1,142 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f8ebd8; /* Light beige to complement #CD853F */
-    color: #333; /* Dark text for readability */
-  }
-  
-  h1 {
-    text-align: center;
-    color: #CD853F;
-  }
-  
-  /* button {
-    background-color: #CD853F;
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    margin: 5px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #b37730; 
-  } */
-  
-  button:active {
-    background-color: #8f5e25; /* Even darker shade */
-  }
-  
-  select {
-    background-color: #CD853F;
-    border: none;
-    color: white;
-    padding: 8px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    outline: none;
-    margin-left: 10px;
-  }
-  
-  select option {
-    color: black;
-    background-color: white;
-  }
-  
-  .stage-container {
-    margin: 20px auto;
-    border: 2px solid #CD853F;
-    border-radius: 10px;
-    background-color: white;
-    position: relative;
-  }
-  
-  .grid-line {
-    stroke: white !important; /* White grid */
-    stroke-width: 1;
-  }
-  
-  .wall-line {
-    stroke: #CD853F;
-    stroke-width: 3;
-    cursor: pointer;
-  }
-  
-  .dimension-text {
-    fill: #CD853F;
-    font-weight: bold;
-    font-size: 14px;
-  }
-  
-  .clear-layout {
-    background-color: #8b4513; /* SaddleBrown for clear button */
-    color: white;
-  }
-  
-  .clear-layout:hover {
-    background-color: #6b3410; /* Darker shade */
-  }
-  
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1e7d8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CD853F;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B4513;
+}
+
+/* Button and input focus states */
+button:focus, 
+input:focus, 
+select:focus {
+  outline: 2px solid #CD853F;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+button, 
+select, 
+input {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Canvas container */
+.konvajs-content {
+  background: #ffffff;
+}
+
+/* Dimensions text */
+.konvajs-content text {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Center the grid area and buttons/text above it */
+/* Center the grid area and buttons/text above it */
+.grid-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Full height of the viewport */
+  gap: 20px; /* Space between elements */
+  text-align: center; /* Align text to the center */
+  padding: 0 20px; /* Add padding around the grid */
+  box-sizing: border-box;
+}
+
+
+/* Header Text */
+.header-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #8B4513;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+
+/* Toolbox for buttons */
+.toolbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space between the left and right buttons */
+  gap: 10px;
+  width: 100%;
+  padding: 0 20px; /* Adjust padding to create space on the sides */
+  box-sizing: border-box; /* Ensure padding doesn't overflow */
+}
+
+
+.tool-button, .tool-select {
+  padding: 12px 18px; /* Adjust padding for better spacing */
+  border: 1px solid #8B4513;
+  border-radius: 20px; /* Rounded edges */
+  background-color: #EED9C4;
+  color: #8B4513;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 14px; /* Adjust font size to fit inside buttons */
+}
+
+.toolbox .submit-button {
+  margin-left: auto; /* Push the submit button to the right */
+}
+
+.tool-button.active {
+  background-color: #8B4513;
+  color: #fff;
+}
+
+.tool-button:hover {
+  background-color: #CD853F;
+  color: white;
+}
+
+/* Center the grid container */
+.grid-container {
+  position: relative;
+  margin-top: 20px;
+  border: 2px solid #8B4513;
+  border-radius: 20px; /* Rounded edges */
+  overflow: hidden;
+  background-color: #FAF3E0; /* Light cream background */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for aesthetics */
+  width: 85%; /* Adjust width to fit the design */
+  height: 50%; /* Adjust height to fit the design */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 95px;
+}
+
+/* Decora text at the bottom-right of the grid container */
+.grid-footer {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: #8B4513;
+  font-size: 25px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+}

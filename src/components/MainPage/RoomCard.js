@@ -11,7 +11,7 @@ function RoomCard({ title, isAdd = false, onAdd, onDelete }) {
     if (isAdd) {
       onAdd();
     } else {
-      navigate(""); //ADD LINK HERE 
+      navigate("/floorplan2d"); //ADD LINK HERE 
     }
   };
 

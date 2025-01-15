@@ -134,15 +134,22 @@ function Navigation() {
     const fetchEstimatedBudget = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/predict-budget', {
+        console.log('Sending answers:', answers); // Debugging: Log the answers being sent
+        const response = await fetch('http://localhost:5000/api/predict-budget', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(answers),
         });
+    
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+    
         const data = await response.json();
-        setEstimatedBudget(data.estimatedBudget); // Replace `estimatedBudget` with the correct field name from your API
+        console.log('Received data:', data); // Debugging: Log the API response
+        setEstimatedBudget(data.estimatedBudget);
       } catch (error) {
         console.error('Error fetching budget:', error);
         setEstimatedBudget('Error calculating budget. Please try again.');
@@ -192,7 +199,15 @@ function Navigation() {
                 </p>
                 {!loading && (
                   <h3 className="budget-display">
-                    {estimatedBudget ? `₹ ${estimatedBudget}` : 'N/A'}
+                  {!loading && (
+                    <h3 className="budget-display">
+                      {estimatedBudget && !isNaN(estimatedBudget)
+                        ? `₹ ${Number(estimatedBudget).toLocaleString('en-IN', {
+                            maximumFractionDigits: 0,
+                          })}`
+                        : 'N/A'}
+                    </h3>
+                  )}
                   </h3>
                 )}
               </div>

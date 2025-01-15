@@ -1,12 +1,10 @@
 import React, { useState, useRef } from "react";
 import { Stage, Layer, Line, Text } from "react-konva";
 import { useNavigate } from "react-router-dom";
-import './Floorplan2d.css';
-import LogoutButton from '../Login-in/LogoutButton';
-import { Search, User } from 'lucide-react';
-import './Floorplan2d.css'
-import Konva from 'konva';
-
+import { Search, User, ArrowRightCircle } from "lucide-react";
+import LogoutButton from "../Login-in/LogoutButton";
+import Konva from "konva";
+import "./Floorplan2d.css"
 
 const GRID_SIZE = 20;
 const WALL_THICKNESS = 3;
@@ -57,7 +55,10 @@ const FloorPlan = () => {
     if (tool !== "draw") return;
     const pos = e.target.getStage().getPointerPosition();
     const snapped = snapToGrid(pos.x, pos.y);
-    setWalls([...walls, { points: [snapped.x, snapped.y, snapped.x, snapped.y] }]);
+    setWalls([
+      ...walls,
+      { points: [snapped.x, snapped.y, snapped.x, snapped.y] },
+    ]);
     setIsDrawing(true);
   };
 
@@ -85,47 +86,37 @@ const FloorPlan = () => {
     }
   };
 
-  // Clear the entire layout
-  const handleClearLayout = () => {
-    setWalls([]);
-  };
-
-  // Navigate to 3D view and pass walls state
-  const handleDone = () => {
-    navigate("/floorplan3d", { state: { layout: walls } }); // Passing walls as 'layout' to 3D view
-  };
-
   const handleSave = () => {
     const stage = stageRef.current;
 
     // Find the grid layer and hide it before exporting
-    const gridLayer = stage.findOne('.grid-layer');
+    const gridLayer = stage.findOne(".grid-layer");
     if (gridLayer) gridLayer.visible(false);
 
     // Create a temporary white rectangle as the background
     const backgroundLayer = new Konva.Rect({
-        width: stage.width(),
-        height: stage.height(),
-        fill: 'white',
+      width: stage.width(),
+      height: stage.height(),
+      fill: "white",
     });
     stage.getLayers()[0].add(backgroundLayer);
     backgroundLayer.moveToBottom();
 
     // Create a temporary Konva Text node for "Decora"
     const decoraText = new Konva.Text({
-        text: 'Decora',
-        fontSize: 25,
-        fontFamily: 'Playfair Display', 
-        fill: '#8B4513',
-        x: stage.width() - 100, // Adjust the position as needed
-        y: stage.height() - 30, // Adjust the position as needed
+      text: "Decora",
+      fontSize: 25,
+      fontFamily: "Playfair Display",
+      fill: "#8B4513",
+      x: stage.width() - 100,
+      y: stage.height() - 30,
     });
     stage.getLayers()[0].add(decoraText);
 
     // Export the stage to an image
     const uri = stage.toDataURL({
-        mimeType: 'image/png',
-        pixelRatio: 2, // Increase pixel ratio for higher quality
+      mimeType: "image/png",
+      pixelRatio: 2,
     });
 
     // Cleanup: Remove temporary background and text node, and revert visibility of grid
@@ -134,15 +125,13 @@ const FloorPlan = () => {
     if (gridLayer) gridLayer.visible(true);
 
     // Trigger the download
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = uri;
-    link.download = 'floorplan.png';
+    link.download = "floorplan.png";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-};
-  
-  
+  };
 
   return (
     <div className="floorplan-container">
@@ -158,7 +147,11 @@ const FloorPlan = () => {
           </div>
           <div className="nav-right">
             <div className="search-container">
-              <input type="text" placeholder="Search" className="search-input" />
+              <input
+                type="text"
+                placeholder="Search"
+                className="search-input"
+              />
               <Search className="search-icon" />
             </div>
             <button className="profile-button">
@@ -170,46 +163,53 @@ const FloorPlan = () => {
       </nav>
 
       <div className="content">
-        <h2 className="header-text">Draw the 2D Layout of your room in the grid below</h2>
-        <div className="toolbox">
-          <button
-            onClick={() => setTool("draw")}
-            className={`tool-button ${tool === "draw" ? "active" : ""}`}
-          >
-            Draw Wall
-          </button>
-          <button
-            onClick={() => setTool("delete")}
-            className={`tool-button ${tool === "delete" ? "active" : ""}`}
-          >
-            Delete Wall
-          </button>
-          <select
-            value={unit}
-            onChange={(e) => setUnit(e.target.value)}
-            className="tool-select"
-          >
-            <option value="feet">Feet</option>
-            <option value="meters">Meters</option>
-          </select>
-          <button onClick={() => setWalls([])} className="tool-button">
-            Clear All
-          </button>
-          <button
-            onClick={handleSave}
-            className="tool-button"
-          >
-            Save
-          </button>
-          <button
-            onClick={() => navigate("/floorplan3d", { state: { layout: walls } })}
-            className="tool-button submit-button"
-          >
-            Submit
-          </button>
-        </div>
+        <h2 className="header-text">
+          Draw the 2D Layout of your room in the grid below
+        </h2>
 
-        <div className="grid-container">
+        <div className="canvas-container">
+          <div className="toolbar">
+            <div className="toolbar-left">
+              <button
+                onClick={() => setTool("draw")}
+                className={`tool-button ${tool === "draw" ? "active" : ""}`}
+              >
+                Draw Wall
+              </button>
+              <button
+                onClick={() => setTool("delete")}
+                className={`tool-button ${tool === "delete" ? "active" : ""}`}
+              >
+                Delete Wall
+              </button>
+              <select
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                className="tool-select"
+              >
+                <option value="feet">Feet</option>
+                <option value="meters">Meters</option>
+              </select>
+              <button onClick={() => setWalls([])} className="tool-button">
+                Clear All
+              </button>
+              <button onClick={handleSave} className="tool-button">
+                Download
+              </button>
+            </div>
+            <div className="toolbar-right">
+              <button
+                onClick={() =>
+                  navigate("/floorplan3d", { state: { layout: walls } })
+                }
+                className="submit-button"
+              >
+                Furnish in 3D
+                <ArrowRightCircle className="submit-icon" />
+              </button>
+            </div>
+          </div>
+
           <Stage
             width={window.innerWidth - 100}
             height={600}
@@ -232,11 +232,11 @@ const FloorPlan = () => {
                     x={(wall.points[0] + wall.points[2]) / 2}
                     y={(wall.points[1] + wall.points[3]) / 2 - 15}
                     text={`${(
-                      Math.sqrt(
+                      (Math.sqrt(
                         (wall.points[2] - wall.points[0]) ** 2 +
-                        (wall.points[3] - wall.points[1]) ** 2
+                          (wall.points[3] - wall.points[1]) ** 2
                       ) /
-                      GRID_SIZE *
+                        GRID_SIZE) *
                       conversionFactor
                     ).toFixed(1)} ${unit}`}
                     fontSize={12}
@@ -247,7 +247,6 @@ const FloorPlan = () => {
             </Layer>
           </Stage>
         </div>
-
       </div>
     </div>
   );

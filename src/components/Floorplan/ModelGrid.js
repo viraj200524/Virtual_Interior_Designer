@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
+import './ModelGrid.css'
 
 const ModelGrid = ({ apiKey, onModelSelect }) => {
   const [models, setModels] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // For input field
-  const [query, setQuery] = useState("FURNITURE"); // Default query
+  const [query, setQuery] = useState("Sofa"); // Default query
 
   // Function to fetch models from Sketchfab API
   const fetchModels = async () => {
@@ -39,59 +40,28 @@ const ModelGrid = ({ apiKey, onModelSelect }) => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className="model-grid-container">
       {/* Search bar at the top */}
-      <div style={{ display: "flex", marginBottom: "1rem" }}>
+      <div className="search-bar">
         <input
           type="text"
           placeholder="Search for 3D models..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            flexGrow: 1,
-            padding: "0.5rem",
-            fontSize: "1rem",
-            borderRadius: "4px",
-            border: "1px solid #ddd",
-            marginRight: "0.5rem",
-          }}
         />
         <button
           onClick={handleSearch}
-          style={{
-            padding: "0.5rem 1rem",
-            fontSize: "1rem",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
         >
           Search
         </button>
       </div>
 
       {/* Model grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-          gap: "1rem",
-          flexGrow: 1,
-        }}
-      >
+      <div className="model-grid">
         {models.map((model) => (
           <div
             key={model.uid}
-            style={{
-              cursor: "pointer",
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              overflow: "hidden",
-              textAlign: "center",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-            }}
+            className="model-card"
             onClick={() => handleModelSelect(model)}
           >
             <img

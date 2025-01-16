@@ -1,14 +1,19 @@
 import React from 'react';
 import './FurnitureItem.css';
+import { useState } from 'react';
 
-const FurnitureItem = ({ image_url, name, mrp, url, product, cart_items, handleCartItems, cartPrice, handleCartPrice}) => {
+const CartItem = ({ image_url, name, mrp, url, handleCartItems, cartPrice, handleCartPrice}) => {
 
-  const handleAddToCart = () =>{
-    handleCartItems((prevItems => [...prevItems, product]))
-    handleCartPrice((prevprice)=>prevprice+parseInt(mrp.split(" ")[1], 10))
-  }
+  const removeFromCart = (image_url_) => {
+    handleCartItems((prevItems) =>
+      prevItems.filter((item) => item.image_url !== image_url_)
+    );
+    handleCartPrice((prevprice)=>prevprice-parseInt(mrp.split(" ")[1], 10))
+  };
+  
   return (
     <div className="furniture-card">
+       
       <div className="image-container">
         <img src={image_url} alt={name} />
       </div>
@@ -29,9 +34,9 @@ const FurnitureItem = ({ image_url, name, mrp, url, product, cart_items, handleC
           
           <button 
             className="cart-button"
-            onClick={handleAddToCart}
+            onClick={()=>{removeFromCart(image_url)}}
           >
-            Add to Cart
+            Remove From Cart
           </button>
         </div>
       </div>
@@ -39,4 +44,4 @@ const FurnitureItem = ({ image_url, name, mrp, url, product, cart_items, handleC
   );
 };
 
-export default FurnitureItem;
+export default CartItem;

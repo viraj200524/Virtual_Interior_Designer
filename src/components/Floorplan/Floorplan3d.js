@@ -7,6 +7,7 @@ import FurnitureGrid from "./FurnitureGrid.js";
 import ModelGrid from "./ModelGrid.js";
 import PaintGrid from './PaintGrid.js';
 import ModelRenderer from './ModelItem';
+import Cart from './Cart.js'
 
 const FloorPlan3D = () => {
   const mountRef = useRef(null);
@@ -29,6 +30,9 @@ const FloorPlan3D = () => {
   const [isPaintMode, setIsPaintMode] = useState(false);
   const wallMeshesRef = useRef([]);
 
+  const[cartItems,handleCartItems] = useState([]);
+  const[cartPrice,SetCartPrice] = useState(0);
+
   // Handle paint selection
   const handlePaintSelect = (paint) => {
     console.log("Selected Paint:", paint);
@@ -36,6 +40,17 @@ const FloorPlan3D = () => {
     setIsPaintMode(true);
     mountRef.current.classList.add('painting');
   };
+
+  useEffect(() => {
+    fetch('http://localhost:5000/products')
+      .then(response => response.json())
+      .then(data => {
+        setFurnitureItems(data);
+      })
+      .catch(error => {
+        console.error('Error fetching products:', error);
+      });
+  }, []);
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -291,10 +306,16 @@ const FloorPlan3D = () => {
             >
               PAINT
             </button>
+            <button
+              className={`header-button ${activeTab === "CART" ? "active" : ""}`}
+              onClick={() => setActiveTab("CART")}
+            >
+              CART
+            </button>
           </div>
 
           <div className="furniture-grid">
-            {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} />}
+            {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
             {activeTab === "MODELS" && (
               <ModelGrid
                 apiKey="9d2379512bd84812beb65f0ffe608310"
@@ -302,6 +323,7 @@ const FloorPlan3D = () => {
               />
             )}
             {activeTab === 'PAINT' && <PaintGrid onPaintSelect={handlePaintSelect} />}
+            {activeTab === "CART" && <Cart items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice}/>}
           </div>
         </div>
       </div>

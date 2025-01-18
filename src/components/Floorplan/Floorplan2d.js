@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Stage, Layer, Line, Text } from "react-konva";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link , useParams} from "react-router-dom";
 import { Search, User, ArrowRightCircle } from "lucide-react";
 import LogoutButton from "../Login-in/LogoutButton";
 import Konva from "konva";
@@ -9,7 +9,8 @@ import "./Floorplan2d.css"
 const GRID_SIZE = 20;
 const WALL_THICKNESS = 3;
 
-const FloorPlan = () => {
+const FloorPlan = ({userId}) => {
+  const {user_id, room_id} = useParams()
   const [walls, setWalls] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState("draw");
@@ -142,7 +143,7 @@ const FloorPlan = () => {
             <div className="nav-links">
               <a href="/">Design</a>
               <a href="/products">Products</a>
-              <a href="/budget-estimator">Budget Estimator</a>
+              <Link to={`/${user_id}/budget-estimator`}>Budget Estimator</Link>
             </div>
           </div>
           <div className="nav-right">
@@ -200,7 +201,7 @@ const FloorPlan = () => {
             <div className="toolbar-right">
               <button
                 onClick={() =>
-                  navigate("/floorplan3d", { state: { layout: walls } })
+                  navigate(`/${user_id}/${room_id}/floorplan3d`, { state: { layout: walls } })
                 }
                 className="submit-button"
               >

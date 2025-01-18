@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, User, Plus } from "lucide-react";
 import "./MainPage.css";
 import { useNavigate, Link } from "react-router-dom";
 import RoomCard from "./RoomCard";
 import { useAuth0 } from "@auth0/auth0-react";
 import LogoutButton from "../Login-in/LogoutButton";
-import RoomQuiz from "../RoomQuiz/RoomQuiz";
+import CryptoJS from "crypto-js";
 
 // NavLink Component
 function NavLink({ children, to }) {
@@ -17,16 +17,15 @@ function NavLink({ children, to }) {
 }
 
 // Navigation Component
-function Navigation() {
+function Navigation(props) {
   return (
     <nav className="nav">
       <div className="nav-content">
         <div className="nav-left">
           <h1 className="logo">Decora</h1>
           <div className="nav-links">
-            <NavLink to="/">Design</NavLink>
             <NavLink to="/products">Products</NavLink>
-            <a href="/budget-estimator">Budget Estimator</a>
+            <Link to={`/${props.userId}/budget-estimator`}>Budget Estimator</Link>
           </div>
         </div>
         <div className="nav-right">
@@ -85,12 +84,27 @@ function AddRoomModal({ isOpen, onClose, onAdd }) {
   );
 }
 
+
 // Main Page Component
 function MainPage() {
   const { user } = useAuth0();
   const navigate = useNavigate();
   const [rooms, setRooms] = useState(["Living Room", "Bedroom", "Kitchen"]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userId, setUserId] = useState(null); // Store userId in state
+
+  const generateUniqueId = (email, length = 20) => {
+    const hash = CryptoJS.SHA256(email).toString();
+    return hash.substring(0, length);
+  };
+
+  useEffect(() => {
+    if (user) {
+      const generatedUserId = generateUniqueId(user.email, 18);
+      setUserId(generatedUserId); // Update userId in state
+      navigate(`/${generatedUserId}/main-page`); // Navigate to the dynamic URL
+    }
+  }, [user, navigate]);
 
   const handleAddRoom = (roomName) => {
     if (roomName) {
@@ -104,7 +118,7 @@ function MainPage() {
 
   return (
     <div className="container">
-      <Navigation />
+      <Navigation userId={userId} /> {/* Pass userId from state */}
 
       <main className="main">
         <div className="welcome-section">
@@ -117,9 +131,14 @@ function MainPage() {
             My Projects
           </h3>
           <div className="rooms-container">
-            <RoomCard isAdd={true} onAdd={() => setIsModalOpen(true)} />
+            <RoomCard isAdd={true} onAdd={() => setIsModalOpen(true)} userId={userId} />
             {rooms.map((room) => (
-              <RoomCard key={room} title={room} onDelete={handleDeleteRoom} />
+              <RoomCard
+                key={room}
+                title={room}
+                onDelete={handleDeleteRoom}
+                userId={userId} // Pass userId from state
+              />
             ))}
           </div>
         </div>

@@ -6,8 +6,11 @@ import random
 import time
 from fake_useragent import UserAgent
 import json
+from dotenv import load_dotenv
+import os
 
-
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -18,8 +21,7 @@ class PepperfryScraper:
         self.ua = UserAgent()
         self.scraper_api_key = scraper_api_key
         self.base_domain = "https://www.pepperfry.com"
-        self.scraper_api_url = "http://api.scraperapi.com/?api_key=your_api_keyc&url=https%3A%2F%2Fwww.pepperfry.com"
-
+        self.scraper_api_url = f"http://api.scraperapi.com/?api_key={os.getenv('SCRAPER_API_KEY')}&url=https%3A%2F%2Fwww.pepperfry.com"
 
     def get_random_headers(self):
         return {
@@ -104,7 +106,7 @@ class PepperfryScraper:
 @app.route('/scrape', methods=['POST'])
 def scrape_data():
     base_url = request.json.get('base_url', "https://www.pepperfry.com/site_product/search?q=furniture")
-    scraper_api_key = request.json.get('your_api_key', '')  # Provide ScraperAPI key here
+    scraper_api_key = os.getenv('SCRAPER_API_KEY')  # Get ScraperAPI key from .env file
     if not scraper_api_key:
         return jsonify({'error': 'ScraperAPI key is required'}), 400
 

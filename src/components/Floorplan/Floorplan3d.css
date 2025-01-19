@@ -215,3 +215,25 @@
         font-size: 0.9rem;
     }
 }
+
+.tool-button {
+  
+  padding: 8px 16px;
+  border: 1px solid #8B4513;
+  border-radius: 10px;
+  background-color: #EED9C4;
+  color: #8B4513;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tool-button.active {
+  background-color: #8B4513;
+  color: white;
+}
+
+.tool-button:hover {
+  background-color: #CD853F;
+  color: white;
+}
+

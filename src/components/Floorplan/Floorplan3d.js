@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams, Link } from "react-router-dom";
 import * as THREE from "three";
 import { OrbitControls } from "three-stdlib";
 import "./Floorplan3d.css";
@@ -8,8 +8,11 @@ import ModelGrid from "./ModelGrid.js";
 import PaintGrid from './PaintGrid.js';
 import ModelRenderer from './ModelItem';
 import Cart from './Cart.js'
+import { Search, User } from "lucide-react";
+import LogoutButton from "../Login-in/LogoutButton.js";
 
 const FloorPlan3D = () => {
+  const { user_id, room_id } = useParams();
   const mountRef = useRef(null);
   const location = useLocation();
   const [sceneObjects, setSceneObjects] = useState(null);
@@ -25,13 +28,11 @@ const FloorPlan3D = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  
   const [selectedPaint, setSelectedPaint] = useState(null);
   const [isPaintMode, setIsPaintMode] = useState(false);
   const wallMeshesRef = useRef([]);
-
-  const[cartItems,handleCartItems] = useState([]);
-  const[cartPrice,SetCartPrice] = useState(0);
+  const [cartItems, handleCartItems] = useState([]);
+  const [cartPrice, SetCartPrice] = useState(0);
 
   // Handle paint selection
   const handlePaintSelect = (paint) => {
@@ -51,6 +52,95 @@ const FloorPlan3D = () => {
         console.error('Error fetching products:', error);
       });
   }, []);
+
+  // Function to capture a screenshot
+  const captureScreenshot = (camera, renderer, scene) => {
+    renderer.render(scene, camera); // Render the scene with the given camera
+    return renderer.domElement.toDataURL('image/png'); // Capture the screenshot as a data URL
+  };
+
+  // Function to generate a collage from 4 screenshots
+  const generateCollage = async (frontView, topView, leftView, rightView) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas dimensions (2x2 grid of screenshots)
+    canvas.width = 800; // Adjust as needed
+    canvas.height = 800; // Adjust as needed
+
+    // Load each screenshot as an image
+    const loadImage = (src) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+      });
+    };
+
+    const [frontImg, topImg, leftImg, rightImg] = await Promise.all([
+      loadImage(frontView),
+      loadImage(topView),
+      loadImage(leftView),
+      loadImage(rightView),
+    ]);
+
+    // Draw each screenshot onto the canvas
+    ctx.drawImage(frontImg, 0, 0, 400, 400); // Top-left
+    ctx.drawImage(topImg, 400, 0, 400, 400); // Top-right
+    ctx.drawImage(leftImg, 0, 400, 400, 400); // Bottom-left
+    ctx.drawImage(rightImg, 400, 400, 400, 400); // Bottom-right
+
+    // Convert canvas to a data URL
+    return canvas.toDataURL('image/png');
+  };
+
+  // Function to handle the download button click
+  const handleDownload = async () => {
+    if (!sceneObjects) return;
+
+    const { scene, camera, renderer } = sceneObjects;
+
+    // Save the original camera position and rotation
+    const originalPosition = camera.position.clone();
+    const originalRotation = camera.rotation.clone();
+
+    // Capture front view
+    camera.position.set(-500, 800, 1000); // Adjust for front view
+    camera.lookAt(0, 0, 0);
+    const frontView = captureScreenshot(camera, renderer, scene);
+
+    // Capture top view
+    camera.position.set(0, 1000, 0); // Adjust for top view
+    camera.lookAt(0, 0, 0);
+    const topView = captureScreenshot(camera, renderer, scene);
+
+    // Capture left view
+    camera.position.set(-1000, 800, 0); // Adjust for left view
+    camera.lookAt(0, 0, 0);
+    const leftView = captureScreenshot(camera, renderer, scene);
+
+    // Capture right view
+    camera.position.set(1000, 800, 0); // Adjust for right view
+    camera.lookAt(0, 0, 0);
+    const rightView = captureScreenshot(camera, renderer, scene);
+
+    // Restore the original camera position and rotation
+    camera.position.copy(originalPosition);
+    camera.rotation.copy(originalRotation);
+    renderer.render(scene, camera); // Re-render the original view
+
+    // Generate the collage
+    const collageDataUrl = await generateCollage(frontView, topView, leftView, rightView);
+
+    // Trigger download
+    const link = document.createElement('a');
+    link.href = collageDataUrl;
+    link.download = 'floorplan_collage.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -118,13 +208,13 @@ const FloorPlan3D = () => {
       const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
       const centerWallX = (x1 + x2) / 2 - centerX;
       const centerWallY = (y1 + y2) / 2 - centerY;
-    
+
       const wallGeometry = new THREE.BoxGeometry(
         length,
         wallHeight,
         wallThickness
       );
-    
+
       const wallMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         roughness: 0.2,
@@ -133,12 +223,12 @@ const FloorPlan3D = () => {
         opacity: 1,
         side: THREE.DoubleSide
       });
-    
+
       const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
       wallMesh.position.set(centerWallX, wallHeight / 2, centerWallY);
       const angle = Math.atan2(y2 - y1, x2 - x1);
       wallMesh.rotation.y = -angle;
-    
+
       scene.add(wallMesh);
       wallMeshes.push(wallMesh);
       wallMeshesRef.current.push(wallMesh);
@@ -150,14 +240,14 @@ const FloorPlan3D = () => {
 
     const handleWallClick = (event) => {
       if (!isPaintMode || !selectedPaint) return;
-    
+
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    
+
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(wallMeshesRef.current);
-    
+
       if (intersects.length > 0) {
         const wallMesh = intersects[0].object;
         if (wallMesh.material) {
@@ -266,21 +356,48 @@ const FloorPlan3D = () => {
 
   return (
     <div className="decora-container">
+      <nav className="nav">
+        <div className="nav-content">
+          <div className="nav-left">
+            <h1 className="logo">Decora</h1>
+            <div className="nav-links">
+              <a href="/">Design</a>
+              <a href="/products">Products</a>
+              <Link to={`/${user_id}/budget-estimator`}>Budget Estimator</Link>
+            </div>
+          </div>
+          <div className="nav-right">
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search"
+                className="search-input"
+              />
+              <Search className="search-icon" />
+            </div>
+            <button className="profile-button">
+              <User className="profile-icon" />
+            </button>
+            <LogoutButton />
+          </div>
+        </div>
+      </nav>
       <div className="main-content">
         <div className="layout-container">
+          <button className="tool-button" onClick={handleDownload}>Download</button>
           <div ref={mountRef} className="threejs-container" />
           {sceneObjects && (
             <ModelRenderer
-            scene={sceneObjects.scene}
-            camera={sceneObjects.camera}
-            renderer={sceneObjects.renderer}
-            selectedModel={selectedModel}
-            walls={location.state?.layout || []}
-            floorBounds={floorplanBounds}
-            onError={setError}
-            onLoadingChange={setIsLoading}
-            orbitControls={controlsRef.current} // Pass the OrbitControls instance
-          />
+              scene={sceneObjects.scene}
+              camera={sceneObjects.camera}
+              renderer={sceneObjects.renderer}
+              selectedModel={selectedModel}
+              walls={location.state?.layout || []}
+              floorBounds={floorplanBounds}
+              onError={setError}
+              onLoadingChange={setIsLoading}
+              orbitControls={controlsRef.current}
+            />
           )}
           {isLoading && <div className="loading-indicator">Loading...</div>}
           {error && <div className="error-message">{error}</div>}
@@ -323,7 +440,7 @@ const FloorPlan3D = () => {
               />
             )}
             {activeTab === 'PAINT' && <PaintGrid onPaintSelect={handlePaintSelect} />}
-            {activeTab === "CART" && <Cart items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice}/>}
+            {activeTab === "CART" && <Cart items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
           </div>
         </div>
       </div>

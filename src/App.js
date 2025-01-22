@@ -7,6 +7,7 @@ import Floorplan2d from './components/Floorplan/Floorplan2d.js';
 import FloorPlan3d from './components/Floorplan/Floorplan3d.js';
 import RoomQuiz from './components/RoomQuiz/RoomQuiz.js';
 import CryptoJS from "crypto-js";
+import Chatbot from './components/ChatBot/Chatbot.js';
 
 function App() {
   const domain = process.env.REACT_APP_AUTH0_DOMAIN;
@@ -42,6 +43,7 @@ function App() {
             <Route path="/:user_id/:room_id/floorplan3d" element={<FloorPlan3d />} />
             <Route path="/:user_id/budget-estimator" element={<RoomQuiz />} />
           </Routes>
+          <Chatbot/>
         </div>
       </Auth0Provider>
     </Router>

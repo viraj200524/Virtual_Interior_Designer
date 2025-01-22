@@ -239,33 +239,48 @@ const FloorPlan3D = () => {
     const mouse = new THREE.Vector2();
 
     const handleWallClick = (event) => {
-      if (!isPaintMode || !selectedPaint) return;
-
+      if (!isPaintMode || !selectedPaint) {
+        console.log("Paint mode is not active or no paint is selected.");
+        return;
+      }
+    
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
+    
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(wallMeshesRef.current);
-
+    
       if (intersects.length > 0) {
         const wallMesh = intersects[0].object;
+        console.log("Wall clicked:", wallMesh);
+        console.log("Selected paint color:", selectedPaint.color);
+    
+        // Dispose of the old material
         if (wallMesh.material) {
           wallMesh.material.dispose();
         }
+    
+        // Create a new material with the selected color
         const newMaterial = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(selectedPaint.color),
+          color: new THREE.Color(selectedPaint.color), // Ensure the color is valid
           roughness: 0.2,
           metalness: 0.1,
           side: THREE.DoubleSide,
         });
+    
+        // Apply the new material to the wall mesh
         wallMesh.material = newMaterial;
-        wallMesh.material.needsUpdate = true;
-        wallMesh.geometry.computeBoundingSphere();
-        scene.needsUpdate = true;
-        requestAnimationFrame(() => {
-          renderer.render(scene, camera);
-        });
+        wallMesh.material.needsUpdate = true; // Ensure the material is updated
+        wallMesh.geometry.computeBoundingSphere(); // Recompute bounding sphere
+    
+        console.log("Wall material after update:", wallMesh.material);
+    
+        // Force a re-render of the scene
+        renderer.render(scene, camera);
+        console.log("Scene re-rendered with updated wall color.");
+      } else {
+        console.log("No wall was clicked.");
       }
     };
 
@@ -435,7 +450,7 @@ const FloorPlan3D = () => {
             {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
             {activeTab === "MODELS" && (
               <ModelGrid
-                apiKey="your_sketchfab_api"
+                apiKey="9d2379512bd84812beb65f0ffe608310"
                 onModelSelect={setSelectedModel}
               />
             )}

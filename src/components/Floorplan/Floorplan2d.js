@@ -5,6 +5,7 @@ import { Search, User, ArrowRightCircle } from "lucide-react";
 import LogoutButton from "../Login-in/LogoutButton";
 import Konva from "konva";
 import "./Floorplan2d.css"
+import Chatbot from "../ChatBot/Chatbot";
 
 const GRID_SIZE = 20;
 const WALL_THICKNESS = 3;

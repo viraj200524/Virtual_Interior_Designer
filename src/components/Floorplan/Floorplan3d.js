@@ -7,7 +7,7 @@ import FurnitureGrid from "./FurnitureGrid.js";
 import ModelGrid from "./ModelGrid.js";
 import PaintGrid from './PaintGrid.js';
 import ModelRenderer from './ModelItem';
-import Cart from './Cart.js'
+import Cart from './Cart.js';
 import { Search, User } from "lucide-react";
 import LogoutButton from "../Login-in/LogoutButton.js";
 
@@ -258,6 +258,7 @@ const FloorPlan3D = () => {
     
         // Dispose of the old material
         if (wallMesh.material) {
+          console.log("Disposing old material:", wallMesh.material);
           wallMesh.material.dispose();
         }
     

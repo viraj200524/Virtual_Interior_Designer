@@ -14,33 +14,14 @@ const ModelRenderer = ({
   onLoadingChange,
   orbitControls,
 }) => {
-  const currentModelRef = useRef(null);
+  const modelsRef = useRef([]); // Store all placed models
   const dragControlsRef = useRef(null);
   const [isDraggingEnabled, setIsDraggingEnabled] = useState(true);
   const [isRotatingEnabled, setIsRotatingEnabled] = useState(false);
   const initialMousePosition = useRef({ x: 0, y: 0 });
-  const isModelClicked = useRef(false);
+  const isModelClicked = useRef(null);
   const isDraggingRef = useRef(false);
   const isRotatingRef = useRef(false);
-  const mouseRef = useRef(new THREE.Vector2());
-  const intersectionPointRef = useRef(new THREE.Vector3());
-
-  // Check if the mouse intersects with the model
-  const checkModelIntersection = (event) => {
-    const rect = renderer.domElement.getBoundingClientRect();
-    const mouse = new THREE.Vector2();
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-
-    if (currentModelRef.current) {
-      const intersects = raycaster.intersectObject(currentModelRef.current, true);
-      return intersects.length > 0;
-    }
-    return false;
-  };
 
   // Load the 3D model
   const loadModel = (url) => {
@@ -54,11 +35,6 @@ const ModelRenderer = ({
         const modelGroup = new THREE.Group();
         modelGroup.add(model); // Add the entire model to the group
 
-        // Remove the previous model if it exists
-        if (currentModelRef.current) {
-          scene.remove(currentModelRef.current);
-        }
-
         // Scale and position the model
         const box = new THREE.Box3().setFromObject(modelGroup);
         const size = box.getSize(new THREE.Vector3());
@@ -67,14 +43,14 @@ const ModelRenderer = ({
         modelGroup.position.set(0, 0, 0);
 
         scene.add(modelGroup);
-        currentModelRef.current = modelGroup;
+        modelsRef.current.push(modelGroup);
 
         // Set up drag controls
         if (dragControlsRef.current) {
           dragControlsRef.current.dispose();
         }
 
-        const dragControls = new DragControls([modelGroup], camera, renderer.domElement);
+        const dragControls = new DragControls(modelsRef.current, camera, renderer.domElement);
         dragControls.enabled = false; // Disable drag controls by default
         dragControlsRef.current = dragControls;
 
@@ -82,31 +58,38 @@ const ModelRenderer = ({
         const onMouseDown = (event) => {
           event.preventDefault();
 
-          if (!checkModelIntersection(event)) {
-            return;
-          }
+          const rect = renderer.domElement.getBoundingClientRect();
+          const mouse = new THREE.Vector2();
+          mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-          isModelClicked.current = true;
-          initialMousePosition.current = { x: event.clientX, y: event.clientY };
+          const raycaster = new THREE.Raycaster();
+          raycaster.setFromCamera(mouse, camera);
 
-          // Disable OrbitControls when interacting with the model
-          if (orbitControls) {
-            orbitControls.enabled = false;
-          }
+          const intersects = raycaster.intersectObjects(modelsRef.current, true);
+          if (intersects.length > 0) {
+            isModelClicked.current = intersects[0].object;
+            initialMousePosition.current = { x: event.clientX, y: event.clientY };
 
-          // Check which button is pressed
-          if (event.button === 0) {
-            // Left click - enable dragging
-            setIsDraggingEnabled(true);
-            setIsRotatingEnabled(false);
-            if (dragControlsRef.current) {
-              dragControlsRef.current.enabled = true;
+            // Disable OrbitControls when interacting with the model
+            if (orbitControls) {
+              orbitControls.enabled = false;
             }
-          } else if (event.button === 2) {
-            // Right click - enable rotation
-            setIsDraggingEnabled(false);
-            setIsRotatingEnabled(true);
-            isRotatingRef.current = true;
+
+            // Check which button is pressed
+            if (event.button === 0) {
+              // Left click - enable dragging
+              setIsDraggingEnabled(true);
+              setIsRotatingEnabled(false);
+              if (dragControlsRef.current) {
+                dragControlsRef.current.enabled = true;
+              }
+            } else if (event.button === 2) {
+              // Right click - enable rotation
+              setIsDraggingEnabled(false);
+              setIsRotatingEnabled(true);
+              isRotatingRef.current = true;
+            }
           }
         };
 
@@ -116,11 +99,11 @@ const ModelRenderer = ({
 
           event.preventDefault();
 
-          if (isRotatingRef.current && currentModelRef.current) {
+          if (isRotatingRef.current && isModelClicked.current) {
             const deltaX = event.clientX - initialMousePosition.current.x;
 
-            // Rotate only around the Y-axis
-            currentModelRef.current.rotation.y += deltaX * 0.01;
+            // Rotate only around the Z-axis
+            isModelClicked.current.rotation.z += deltaX * 0.01;
 
             // Update initial mouse position
             initialMousePosition.current = { x: event.clientX, y: event.clientY };
@@ -131,7 +114,7 @@ const ModelRenderer = ({
         const onMouseUp = (event) => {
           event.preventDefault();
 
-          isModelClicked.current = false;
+          isModelClicked.current = null;
           setIsRotatingEnabled(false);
           isRotatingRef.current = false;
 
@@ -209,15 +192,16 @@ const ModelRenderer = ({
       if (dragControlsRef.current) {
         dragControlsRef.current.dispose();
       }
-      if (currentModelRef.current) {
-        scene.remove(currentModelRef.current);
-        currentModelRef.current.traverse((object) => {
+      modelsRef.current.forEach(model => {
+        scene.remove(model);
+        model.traverse((object) => {
           if (object instanceof THREE.Mesh) {
             object.geometry.dispose();
             object.material.dispose();
           }
         });
-      }
+      });
+      modelsRef.current = [];
       // Re-enable OrbitControls on cleanup
       if (orbitControls) {
         orbitControls.enabled = true;

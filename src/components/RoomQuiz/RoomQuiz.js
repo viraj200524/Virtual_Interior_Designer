@@ -86,7 +86,7 @@ function Navigation() {
       title: 'Renovation',
       question: 'What type of renovation was done in your house?',
       icon: '🔨',
-      options: ['Necessity', 'Moderate', 'Luxury'],
+      options: ['necessity', 'moderate', 'luxury'],
     },
     {
       id: 'age',
@@ -101,7 +101,7 @@ function Navigation() {
       title: 'Material Quality',
       question: 'What is the quality of materials used in your house?',
       icon: '⭐',
-      options: ['Low', 'Medium', 'High'],
+      options: ['low', 'medium', 'high'],
     },
   ];
 
@@ -199,15 +199,11 @@ function Navigation() {
                 </p>
                 {!loading && (
                   <h3 className="budget-display">
-                  {!loading && (
-                    <h3 className="budget-display">
-                      {estimatedBudget && !isNaN(estimatedBudget)
-                        ? `₹ ${Number(estimatedBudget).toLocaleString('en-IN', {
-                            maximumFractionDigits: 0,
-                          })}`
-                        : 'N/A'}
-                    </h3>
-                  )}
+                    {estimatedBudget && !isNaN(estimatedBudget)
+                      ? `₹ ${Number(estimatedBudget).toLocaleString('en-IN', {
+                          maximumFractionDigits: 0,
+                        })}`
+                      : 'N/A'}
                   </h3>
                 )}
               </div>

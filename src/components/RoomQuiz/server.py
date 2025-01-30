@@ -1,65 +1,97 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import h5py
 import numpy as np
+import pandas as pd
+import os
+import joblib
+import random
 
 app = Flask(__name__)
-from flask_cors import CORS
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
-app = Flask(__name__)
-CORS(app,resources={r"/api/*": {"origins": "http://localhost:3000"}})  # Enable CORS for all routes
+def load_model():
+    model_path = './linear_regression_model.joblib'
+    
+    # Check if model file exists
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found at {model_path}. Please ensure the model file is in the correct location.")
+    
+    try:
+        # Load the scikit-learn pipeline
+        model = joblib.load(model_path)
+        return model
+    except Exception as e:
+        raise Exception(f"Error loading model: {str(e)}")
 
-# Load the model parameters from h5 file
-def load_model_params():
-    with h5py.File('./model.h5', 'r') as f:
-        model_params = f['model_parameters']
-        coefficients = model_params['coefficients'][:]
-        intercept = model_params['intercept'][()]
-    return coefficients, intercept
-
-# Load the model parameters
-coefficients, intercept = load_model_params()
+# Initialize model as None
+model = None
 
 @app.route('/api/predict-budget', methods=['POST'])
 def predict_budget():
+    global model
+    
     try:
+        # Load the model if not already loaded
+        if model is None:
+            try:
+                model = load_model()
+            except Exception as e:
+                # If model loading fails, return a dummy prediction for testing
+                print(f"Warning: Using dummy model due to loading error: {str(e)}")
+                return jsonify({
+                    'estimatedBudget': 500000,  # Dummy value for testing
+                    'warning': 'Using test mode: Model not loaded'
+                })
+
         # Get the data from the POST request
         data = request.get_json()
-        print("Received data:", data)  # Debugging: Log the received data
+        print("Received data:", data)
 
-        # Preprocess string inputs into numerical values
-        locality_map = {'Urban': 1, 'Rural': 0}
-        renovation_map = {'Necessity': 0, 'Moderate': 1, 'Luxury': 2}
-        quality_map = {'Low': 0, 'Medium': 1, 'High': 2}
+        # Validate required fields
+        required_fields = ['bedrooms', 'sqft', 'price', 'toilets', 'locality', 
+                         'renovation', 'age', 'quality']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
 
-        features = [
-            int(data.get('bedrooms', 0)),       # Number of bedrooms
-            float(data.get('sqft', 0)),         # Square footage
-            float(data.get('price', 0)),        # Price per square foot
-            int(data.get('toilets', 0)),        # Number of bathrooms
-            locality_map.get(data.get('locality', 'Urban'), 1),  # Locality (encoded)
-            renovation_map.get(data.get('renovation', 'Necessity'), 0),  # Renovation (encoded)
-            int(data.get('age', 0)),            # Age of the house
-            quality_map.get(data.get('quality', 'Low'), 0)  # Material quality (encoded)
-        ]
+        # Map input data keys to training data column names
+        mapped_data = {
+            'Bedrooms': int(data['bedrooms']),
+            'Sqft Area': float(data['sqft']),
+            'Price per Sqft (INR)': float(data['price']),
+            'Toilets': int(data['toilets']),
+            'House Age (years)': int(data['age']),
+            'Locality': data['locality'],  # Keep as string for the pipeline
+            'Renovation Type': data['renovation'].lower(),  # Normalize to lowercase for the pipeline
+            'Material Quality': data['quality'].lower(),
+            'Energy Efficiency Rating': random.randint(1, 5)  # Add a random energy efficiency rating
+        }
 
-        # Convert to numpy array
-        features_array = np.array(features).reshape(1, -1)
+        # Convert the mapped data to a DataFrame
+        input_df = pd.DataFrame([mapped_data])
 
-        # Make prediction using the loaded coefficients and intercept
-        prediction = np.dot(features_array, coefficients) + intercept
-        print("Prediction:", prediction)  # Debugging: Log the prediction
+        # Use the model's pipeline for prediction
+        prediction = model.predict(input_df)
+        print("Prediction:", prediction)
 
-        # Return the prediction as JSON
-        return jsonify({'estimatedBudget': float(prediction[0])})
+        return jsonify({'estimatedBudget': float(prediction[0]*(np.random.randint(2,5)*0.08))})
 
     except Exception as e:
-        print("Error:", e)  # Debugging: Log any errors
-        return jsonify({'error': str(e)}), 500
-
-    except Exception as e:
-        print("Error:", e)  # Debugging: Log any errors
-        return jsonify({'error': str(e)}), 500
+        print("Error:", e)
+        return jsonify({
+            'error': 'Internal server error',
+            'details': str(e)
+        }), 500
 
 if __name__ == '__main__':
+    # Try to load the model at startup
+    try:
+        model = load_model()
+        print("Model loaded successfully!")
+    except Exception as e:
+        print(f"Warning: Could not load model at startup: {str(e)}")
+        print("Server will run in test mode with dummy predictions")
+    
     app.run(debug=True)

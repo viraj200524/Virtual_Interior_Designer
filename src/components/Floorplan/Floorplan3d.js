@@ -465,7 +465,7 @@ const FloorPlan3D = () => {
             {activeTab === "FURNITURE" && <FurnitureGrid FurnitureLoading={FurnitureLoading} setFurnitureSearch={SetFurnitureSearch} products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
             {activeTab === "MODELS" && (
               <ModelGrid
-                apiKey="9d2379512bd84812beb65f0ffe608310"
+                apiKey={process.env.SKETCHFAB_API_KEY}
                 onModelSelect={setSelectedModel}
               />
             )}

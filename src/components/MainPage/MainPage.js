@@ -24,7 +24,6 @@ function Navigation(props) {
         <div className="nav-left">
           <h1 className="logo">Decora</h1>
           <div className="nav-links">
-            <NavLink to="/products">Products</NavLink>
             <Link to={`/${props.userId}/budget-estimator`}>Budget Estimator</Link>
           </div>
         </div>

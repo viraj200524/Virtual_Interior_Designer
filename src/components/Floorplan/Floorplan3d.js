@@ -49,7 +49,7 @@ const FloorPlan3D = () => {
     const fetchProducts = async () => {
       SetFurnitureLoading(true)
       try {
-        const response = await fetch('http://localhost:5000/products');
+        const response = await fetch('http://localhost:5002/products');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -465,7 +465,7 @@ const FloorPlan3D = () => {
             {activeTab === "FURNITURE" && <FurnitureGrid FurnitureLoading={FurnitureLoading} setFurnitureSearch={SetFurnitureSearch} products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
             {activeTab === "MODELS" && (
               <ModelGrid
-                apiKey={process.env.SKETCHFAB_API_KEY}
+                apiKey={process.env.REACT_APP_SKETCHFAB_API_KEY}
                 onModelSelect={setSelectedModel}
               />
             )}

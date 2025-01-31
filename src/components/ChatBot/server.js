@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+const GOOGLE_API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 const MODEL_NAME = 'gemini-1.5-flash'; // Replace with the correct model name if different
 
 app.post('/api/chat', async (req, res) => {
@@ -40,7 +40,7 @@ app.post('/api/chat', async (req, res) => {
       res.status(500).json({ error: 'Something went wrong' });
     }
   });
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

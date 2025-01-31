@@ -95,4 +95,4 @@ if __name__ == '__main__':
         print(f"Warning: Could not load model at startup: {str(e)}")
         print("Server will run in test mode with dummy predictions")
     
-    app.run(debug=True)
+    app.run(debug=True, port = 5003)

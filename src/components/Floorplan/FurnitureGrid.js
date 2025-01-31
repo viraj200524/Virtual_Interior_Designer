@@ -12,7 +12,7 @@ const FurnitureGrid = ({FurnitureLoading, setFurnitureSearch, products, items, h
     }
   
     try {
-      const response = await fetch('http://localhost:5000/scrape', {
+      const response = await fetch('http://localhost:5002/scrape', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

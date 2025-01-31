@@ -24,6 +24,7 @@ const ModelGrid = ({ apiKey, onModelSelect }) => {
     }
   };
 
+  
   // Fetch models when the component mounts or query changes
   useEffect(() => {
     fetchModels();

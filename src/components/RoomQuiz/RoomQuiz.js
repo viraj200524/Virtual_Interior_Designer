@@ -138,7 +138,7 @@ function Navigation() {
       setLoading(true);
       try {
         console.log('Sending answers:', answers); // Debugging: Log the answers being sent
-        const response = await fetch('http://localhost:5000/api/predict-budget', {
+        const response = await fetch('http://localhost:5003/api/predict-budget', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

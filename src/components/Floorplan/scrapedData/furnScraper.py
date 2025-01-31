@@ -150,7 +150,8 @@ def scrape_data():
         if not search_query:
             return jsonify({'error': 'Search query is required'}), 400
 
-        scraper_api_key = os.getenv('SCRAPER_API_KEY')
+        scraper_api_key = os.getenv("REACT_APP_SCRAPER_API_KEY")
+
         if not scraper_api_key:
             return jsonify({'error': 'ScraperAPI key not found in environment variables'}), 400
 
@@ -188,7 +189,7 @@ def get_products():
 def auto_scrape():
     try:
         # Send POST request to /scrape
-        post_url = 'http://127.0.0.1:5000/scrape'
+        post_url = 'http://127.0.0.1:5002/scrape'
         post_data = {'search_query': 'gaming chair'}
         post_response = requests.post(post_url, json=post_data)
         
@@ -196,7 +197,7 @@ def auto_scrape():
             return jsonify({'error': f'Failed to scrape data: {post_response.text}'}), 500
 
         # Send GET request to /products
-        get_url = 'http://127.0.0.1:5000/products'
+        get_url = 'http://127.0.0.1:5002/products'
         get_response = requests.get(get_url)
         
         if get_response.status_code != 200:
@@ -208,4 +209,4 @@ def auto_scrape():
         return jsonify({'error': f'Auto scrape failed: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5002)

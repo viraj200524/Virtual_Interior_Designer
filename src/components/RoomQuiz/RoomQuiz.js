@@ -19,9 +19,10 @@ function Navigation() {
       <nav className="nav">
         <div className="nav-content">
           <div className="nav-left">
-            <h1 className="logo">Decora</h1>
+            <h1 className="logo">
+            <a href="/main-page">Decora</a></h1>
             <div className="nav-links">
-              <NavLink to="/">Design</NavLink>
+              {/* <NavLink to="/">Design</NavLink> */}
               <NavLink to="/products">Products</NavLink>
               <a href="/budget-estimator">Budget Estimator</a>
             </div>

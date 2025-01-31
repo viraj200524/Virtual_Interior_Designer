@@ -142,7 +142,7 @@ const FloorPlan = ({userId}) => {
           <div className="nav-left">
             <h1 className="logo">Decora</h1>
             <div className="nav-links">
-              <a href="/">Design</a>
+              {/* <a href="/">Design</a> */}
               <a href="/products">Products</a>
               <Link to={`/${user_id}/budget-estimator`}>Budget Estimator</Link>
             </div>
@@ -174,28 +174,28 @@ const FloorPlan = ({userId}) => {
             <div className="toolbar-left">
               <button
                 onClick={() => setTool("draw")}
-                className={`tool-button ${tool === "draw" ? "active" : ""}`}
+                className={`tool2d-button ${tool === "draw" ? "active" : ""}`}
               >
                 Draw Wall
               </button>
               <button
                 onClick={() => setTool("delete")}
-                className={`tool-button ${tool === "delete" ? "active" : ""}`}
+                className={`tool2d-button ${tool === "delete" ? "active" : ""}`}
               >
                 Delete Wall
               </button>
               <select
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="tool-select"
+                className="tool2d-select"
               >
                 <option value="feet">Feet</option>
                 <option value="meters">Meters</option>
               </select>
-              <button onClick={() => setWalls([])} className="tool-button">
+              <button onClick={() => setWalls([])} className="tool2d-button">
                 Clear All
               </button>
-              <button onClick={handleSave} className="tool-button">
+              <button onClick={handleSave} className="tool2d-button">
                 Download
               </button>
             </div>

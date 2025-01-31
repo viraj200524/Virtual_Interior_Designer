@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+
+.furniture-footer {
+    background-color: #ede0d7;
+    padding: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    border-bottom: 2px solid #DEB887;
+}
+
+.priceh1 {
+    font-family: 'Playfair Display', serif;
+    color: #8B4513; /* Matches the text color for consistency */
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 10px 0;
+}

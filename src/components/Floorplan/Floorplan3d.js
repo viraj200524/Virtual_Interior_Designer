@@ -377,7 +377,7 @@ const FloorPlan3D = () => {
           <div className="nav-left">
             <h1 className="logo">Decora</h1>
             <div className="nav-links">
-              <a href="/">Design</a>
+              {/* <a href="/">Design</a> */}
               <a href="/products">Products</a>
               <Link to={`/${user_id}/budget-estimator`}>Budget Estimator</Link>
             </div>
@@ -400,7 +400,7 @@ const FloorPlan3D = () => {
       </nav>
       <div className="main-content">
         <div className="layout-container">
-          <button className="tool-button" onClick={handleDownload}>Download</button>
+          <button className="tool3d-button" onClick={handleDownload}>Download</button>
           <div ref={mountRef} className="threejs-container" />
           {sceneObjects && (
             <ModelRenderer
@@ -433,12 +433,12 @@ const FloorPlan3D = () => {
             >
               FURNITURE
             </button>
-            <button
+            {/* <button
               className={`header-button ${activeTab === "PAINT" ? "active" : ""}`}
               onClick={() => setActiveTab("PAINT")}
             >
               PAINT
-            </button>
+            </button> */}
             <button
               className={`header-button ${activeTab === "CART" ? "active" : ""}`}
               onClick={() => setActiveTab("CART")}

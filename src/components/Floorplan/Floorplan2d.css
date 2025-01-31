@@ -71,8 +71,8 @@ input {
 }
 
 /* Tool buttons */
-.tool-button,
-.tool-select {
+.tool2d-button,
+.tool2d-select {
   
   padding: 8px 16px;
   border: 1px solid #8B4513;
@@ -83,12 +83,12 @@ input {
   font-size: 14px;
 }
 
-.tool-button.active {
+.tool2d-button.active {
   background-color: #8B4513;
   color: white;
 }
 
-.tool-button:hover {
+.tool2d-button:hover {
   background-color: #CD853F;
   color: white;
 }

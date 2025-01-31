@@ -5,8 +5,10 @@ const FurnitureItem = ({ image_url, name, mrp, url, product, cart_items, handleC
 
   const handleAddToCart = () =>{
     handleCartItems((prevItems => [...prevItems, product]))
-    handleCartPrice((prevprice)=>prevprice+parseInt(mrp.split(" ")[1], 10))
+    handleCartPrice((prevprice)=>prevprice+parseInt(mrp))
   }
+
+  
   return (
     <div className="furniture-card">
       <div className="image-container">
@@ -15,8 +17,8 @@ const FurnitureItem = ({ image_url, name, mrp, url, product, cart_items, handleC
       
       <div className="content-container">
         <h3 className="product-name">{name}</h3>
-        <p className="product-price">{mrp}</p>
-        
+        <p className="product-price">{`₹ ${mrp}`}</p>
+
         <div className="button-container">
           <a 
             href={url}

@@ -33,6 +33,9 @@ const FloorPlan3D = () => {
   const wallMeshesRef = useRef([]);
   const [cartItems, handleCartItems] = useState([]);
   const [cartPrice, SetCartPrice] = useState(0);
+  const[FurnitureSearch, SetFurnitureSearch] = useState(false)
+
+  const [FurnitureLoading, SetFurnitureLoading] = useState(false)
 
   // Handle paint selection
   const handlePaintSelect = (paint) => {
@@ -43,16 +46,25 @@ const FloorPlan3D = () => {
   };
 
   useEffect(() => {
-    fetch('http://localhost:5000/products')
-      .then(response => response.json())
-      .then(data => {
+    const fetchProducts = async () => {
+      SetFurnitureLoading(true)
+      try {
+        const response = await fetch('http://localhost:5000/products');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
         setFurnitureItems(data);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching products:', error);
-      });
-  }, []);
-
+      } finally{
+        SetFurnitureLoading(false)
+      }
+    };
+  
+    fetchProducts();
+    console.log(furnitureItems)
+  }, [FurnitureSearch]);
   // Function to capture a screenshot
   const captureScreenshot = (camera, renderer, scene) => {
     renderer.render(scene, camera); // Render the scene with the given camera
@@ -448,7 +460,7 @@ const FloorPlan3D = () => {
           </div>
 
           <div className="furniture-grid">
-            {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
+            {activeTab === "FURNITURE" && <FurnitureGrid FurnitureLoading={FurnitureLoading} setFurnitureSearch={SetFurnitureSearch} products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
             {activeTab === "MODELS" && (
               <ModelGrid
                 apiKey="9d2379512bd84812beb65f0ffe608310"

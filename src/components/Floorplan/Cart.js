@@ -16,7 +16,7 @@ const Cart = ({ items, handleCartItems, cartPrice, handleCartPrice }) => {
             <div className="card shadow-sm h-100"> {/* Full-height cards */}
               <CartItem 
                 name={element.name} 
-                mrp={element.mrp} 
+                mrp={element.price} 
                 url={element.url} 
                 image_url={element.image_url}
                 handleCartItems={handleCartItems}

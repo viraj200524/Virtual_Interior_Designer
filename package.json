@@ -27,6 +27,7 @@
     "react-reconciler": "^0.28.0",
     "react-router-dom": "^6.4.0",
     "react-scripts": "5.0.1",
+    "react-spinners": "^0.15.0",
     "three": "^0.172.0",
     "three-stdlib": "^2.35.2",
     "web-vitals": "^4.2.4"

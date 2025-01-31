@@ -76,7 +76,7 @@ def predict_budget():
         prediction = model.predict(input_df)
         print("Prediction:", prediction)
 
-        return jsonify({'estimatedBudget': float(prediction[0]*(np.random.randint(2,5)*0.08))})
+        return jsonify({'estimatedBudget': np.ceil(float(prediction[0]*0.5))})
 
     except Exception as e:
         print("Error:", e)
@@ -86,6 +86,7 @@ def predict_budget():
         }), 500
 
 if __name__ == '__main__':
+    
     # Try to load the model at startup
     try:
         model = load_model()

@@ -8,7 +8,7 @@ const CartItem = ({ image_url, name, mrp, url, handleCartItems, cartPrice, handl
     handleCartItems((prevItems) =>
       prevItems.filter((item) => item.image_url !== image_url_)
     );
-    handleCartPrice((prevprice)=>prevprice-parseInt(mrp.split(" ")[1], 10))
+    handleCartPrice((prevprice)=>prevprice-parseInt(mrp))
   };
   
   return (
@@ -20,7 +20,7 @@ const CartItem = ({ image_url, name, mrp, url, handleCartItems, cartPrice, handl
       
       <div className="content-container">
         <h3 className="product-name">{name}</h3>
-        <p className="product-price">{mrp}</p>
+        <p className="product-price">{`₹ ${mrp}`}</p>
         
         <div className="button-container">
           <a 

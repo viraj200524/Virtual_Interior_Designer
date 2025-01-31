@@ -1,15 +1,17 @@
 import React, { useState, useRef } from "react";
 import { Stage, Layer, Line, Text } from "react-konva";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link , useParams} from "react-router-dom";
 import { Search, User, ArrowRightCircle } from "lucide-react";
 import LogoutButton from "../Login-in/LogoutButton";
 import Konva from "konva";
 import "./Floorplan2d.css"
+import Chatbot from "../ChatBot/Chatbot";
 
 const GRID_SIZE = 20;
 const WALL_THICKNESS = 3;
 
-const FloorPlan = () => {
+const FloorPlan = ({userId}) => {
+  const {user_id, room_id} = useParams()
   const [walls, setWalls] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [tool, setTool] = useState("draw");
@@ -140,9 +142,9 @@ const FloorPlan = () => {
           <div className="nav-left">
             <h1 className="logo">Decora</h1>
             <div className="nav-links">
-              <a href="/">Design</a>
+              {/* <a href="/">Design</a> */}
               <a href="/products">Products</a>
-              <a href="/budget-estimator">Budget Estimator</a>
+              <Link to={`/${user_id}/budget-estimator`}>Budget Estimator</Link>
             </div>
           </div>
           <div className="nav-right">
@@ -172,35 +174,35 @@ const FloorPlan = () => {
             <div className="toolbar-left">
               <button
                 onClick={() => setTool("draw")}
-                className={`tool-button ${tool === "draw" ? "active" : ""}`}
+                className={`tool2d-button ${tool === "draw" ? "active" : ""}`}
               >
                 Draw Wall
               </button>
               <button
                 onClick={() => setTool("delete")}
-                className={`tool-button ${tool === "delete" ? "active" : ""}`}
+                className={`tool2d-button ${tool === "delete" ? "active" : ""}`}
               >
                 Delete Wall
               </button>
               <select
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="tool-select"
+                className="tool2d-select"
               >
                 <option value="feet">Feet</option>
                 <option value="meters">Meters</option>
               </select>
-              <button onClick={() => setWalls([])} className="tool-button">
+              <button onClick={() => setWalls([])} className="tool2d-button">
                 Clear All
               </button>
-              <button onClick={handleSave} className="tool-button">
+              <button onClick={handleSave} className="tool2d-button">
                 Download
               </button>
             </div>
             <div className="toolbar-right">
               <button
                 onClick={() =>
-                  navigate("/floorplan3d", { state: { layout: walls } })
+                  navigate(`/${user_id}/${room_id}/floorplan3d`, { state: { layout: walls } })
                 }
                 className="submit-button"
               >

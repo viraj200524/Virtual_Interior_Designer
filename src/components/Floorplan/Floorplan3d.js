@@ -1,23 +1,25 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useParams, Link } from "react-router-dom";
 import * as THREE from "three";
-import { OrbitControls, DragControls } from "three-stdlib";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { OrbitControls } from "three-stdlib";
 import "./Floorplan3d.css";
 import FurnitureGrid from "./FurnitureGrid.js";
 import ModelGrid from "./ModelGrid.js";
 import PaintGrid from './PaintGrid.js';
+import ModelRenderer from './ModelItem';
+import Cart from './Cart.js';
+import { Search, User } from "lucide-react";
+import LogoutButton from "../Login-in/LogoutButton.js";
 
 const FloorPlan3D = () => {
+  const { user_id, room_id } = useParams();
   const mountRef = useRef(null);
   const location = useLocation();
   const [sceneObjects, setSceneObjects] = useState(null);
   const [furnitureItems, setFurnitureItems] = useState([]);
   const [activeTab, setActiveTab] = useState("MODELS");
-  const controlsRef = useRef(null); // For floorplan controls
+  const controlsRef = useRef(null);
   const [selectedModel, setSelectedModel] = useState(null);
-  const currentModelRef = useRef(null);
-  const dragControlsRef = useRef(null); // For furniture dragging
   const [floorplanBounds, setFloorplanBounds] = useState({
     minX: -Infinity,
     maxX: Infinity,
@@ -26,192 +28,119 @@ const FloorPlan3D = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isDraggingEnabled, setIsDraggingEnabled] = useState(true);
-  const [isRotatingEnabled, setIsRotatingEnabled] = useState(false);
-
   const [selectedPaint, setSelectedPaint] = useState(null);
   const [isPaintMode, setIsPaintMode] = useState(false);
   const wallMeshesRef = useRef([]);
+  const [cartItems, handleCartItems] = useState([]);
+  const [cartPrice, SetCartPrice] = useState(0);
 
   // Handle paint selection
   const handlePaintSelect = (paint) => {
-    console.log("Selected Paint:", paint); // Debugging
+    console.log("Selected Paint:", paint);
     setSelectedPaint(paint);
     setIsPaintMode(true);
     mountRef.current.classList.add('painting');
   };
 
-  // Prevent default right-click behavior
   useEffect(() => {
-    const preventContextMenu = (event) => {
-      if (event.button === 2) {
-        event.preventDefault(); // Prevent the context menu
-      }
+    fetch('http://localhost:5000/products')
+      .then(response => response.json())
+      .then(data => {
+        setFurnitureItems(data);
+      })
+      .catch(error => {
+        console.error('Error fetching products:', error);
+      });
+  }, []);
+
+  // Function to capture a screenshot
+  const captureScreenshot = (camera, renderer, scene) => {
+    renderer.render(scene, camera); // Render the scene with the given camera
+    return renderer.domElement.toDataURL('image/png'); // Capture the screenshot as a data URL
+  };
+
+  // Function to generate a collage from 4 screenshots
+  const generateCollage = async (frontView, topView, leftView, rightView) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas dimensions (2x2 grid of screenshots)
+    canvas.width = 800; // Adjust as needed
+    canvas.height = 800; // Adjust as needed
+
+    // Load each screenshot as an image
+    const loadImage = (src) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+      });
     };
 
-    const rendererDom = sceneObjects?.renderer?.domElement;
-    if (rendererDom) {
-      rendererDom.addEventListener("contextmenu", preventContextMenu);
-    }
+    const [frontImg, topImg, leftImg, rightImg] = await Promise.all([
+      loadImage(frontView),
+      loadImage(topView),
+      loadImage(leftView),
+      loadImage(rightView),
+    ]);
 
-    return () => {
-      if (rendererDom) {
-        rendererDom.removeEventListener("contextmenu", preventContextMenu);
-      }
-    };
-  }, [sceneObjects]);
+    // Draw each screenshot onto the canvas
+    ctx.drawImage(frontImg, 0, 0, 400, 400); // Top-left
+    ctx.drawImage(topImg, 400, 0, 400, 400); // Top-right
+    ctx.drawImage(leftImg, 0, 400, 400, 400); // Bottom-left
+    ctx.drawImage(rightImg, 400, 400, 400, 400); // Bottom-right
 
-  // Load and render the selected model
-  useEffect(() => {
-    if (selectedModel && sceneObjects) {
-      const fetchModelDetails = async () => {
-        try {
-          setIsLoading(true);
-          setError(null);
-          const apiKey = "9d2379512bd84812beb65f0ffe608310"; // Use environment variable
-          const downloadResponse = await fetch(
-            `https://api.sketchfab.com/v3/models/${selectedModel}/download`,
-            {
-              headers: {
-                Authorization: `Token ${apiKey}`,
-              },
-            }
-          );
-          const downloadData = await downloadResponse.json();
-          const glbUrl = downloadData.glb.url; // Get the GLB URL
+    // Convert canvas to a data URL
+    return canvas.toDataURL('image/png');
+  };
 
-          if (glbUrl) {
-            loadModel(glbUrl); // Load the model using the GLB URL
-          } else {
-            setError("GLB URL not found in model download information");
-          }
-        } catch (error) {
-          setError("Error fetching model download information");
-          console.error("Error fetching model download information:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+  // Function to handle the download button click
+  const handleDownload = async () => {
+    if (!sceneObjects) return;
 
-      fetchModelDetails();
-    }
-  }, [selectedModel, sceneObjects]);
+    const { scene, camera, renderer } = sceneObjects;
 
-  const loadModel = useCallback(
-    (url) => {
-      const loader = new GLTFLoader();
-      loader.load(
-        url,
-        (gltf) => {
-          const model = gltf.scene;
+    // Save the original camera position and rotation
+    const originalPosition = camera.position.clone();
+    const originalRotation = camera.rotation.clone();
 
-          // Group all parts of the model under a single parent
-          const modelGroup = new THREE.Group();
-          modelGroup.add(model);
-          sceneObjects.scene.add(modelGroup);
-          modelGroup.position.set(0, 50, 0); // Lift it slightly above the floor
+    // Capture front view
+    camera.position.set(-500, 800, 1000); // Adjust for front view
+    camera.lookAt(0, 0, 0);
+    const frontView = captureScreenshot(camera, renderer, scene);
 
-          // Remove previous model if it exists
-          if (currentModelRef.current) {
-            sceneObjects.scene.remove(currentModelRef.current);
-          }
+    // Capture top view
+    camera.position.set(0, 1000, 0); // Adjust for top view
+    camera.lookAt(0, 0, 0);
+    const topView = captureScreenshot(camera, renderer, scene);
 
-          // Calculate bounding box
-          const box = new THREE.Box3().setFromObject(modelGroup);
-          const size = box.getSize(new THREE.Vector3());
+    // Capture left view
+    camera.position.set(-1000, 800, 0); // Adjust for left view
+    camera.lookAt(0, 0, 0);
+    const leftView = captureScreenshot(camera, renderer, scene);
 
-          // Scale model to reasonable size
-          const scale = 100 / size.y;
-          modelGroup.scale.set(scale, scale, scale);
+    // Capture right view
+    camera.position.set(1000, 800, 0); // Adjust for right view
+    camera.lookAt(0, 0, 0);
+    const rightView = captureScreenshot(camera, renderer, scene);
 
-          // Position model at center of floor
-          modelGroup.position.set(0, 0, 0);
+    // Restore the original camera position and rotation
+    camera.position.copy(originalPosition);
+    camera.rotation.copy(originalRotation);
+    renderer.render(scene, camera); // Re-render the original view
 
-          // Update the current model reference
-          currentModelRef.current = modelGroup;
+    // Generate the collage
+    const collageDataUrl = await generateCollage(frontView, topView, leftView, rightView);
 
-          // Make the entire model draggable
-          if (dragControlsRef.current) {
-            dragControlsRef.current.dispose(); // Clean up previous drag controls
-          }
-          dragControlsRef.current = new DragControls(
-            [modelGroup], // Apply DragControls to the group, not individual parts
-            sceneObjects.camera,
-            sceneObjects.renderer.domElement
-          );
-
-          // Disable floorplan controls while dragging
-          dragControlsRef.current.addEventListener("dragstart", () => {
-            if (controlsRef.current) {
-              controlsRef.current.enabled = false;
-            }
-          });
-
-          dragControlsRef.current.addEventListener("dragend", () => {
-            if (controlsRef.current) {
-              controlsRef.current.enabled = true;
-            }
-          });
-
-          // Enable/disable dragging based on state
-          dragControlsRef.current.addEventListener("drag", (event) => {
-            if (isDraggingEnabled) {
-              const model = event.object;
-              model.position.x = Math.max(
-                floorplanBounds.minX,
-                Math.min(floorplanBounds.maxX, model.position.x)
-              );
-              model.position.z = Math.max(
-                floorplanBounds.minZ,
-                Math.min(floorplanBounds.maxZ, model.position.z)
-              );
-            }
-          });
-
-          // Enable rotation on right-click and disable dragging
-          sceneObjects.renderer.domElement.addEventListener("mousedown", (event) => {
-            if (event.button === 2) {
-              // Right-click
-              setIsRotatingEnabled(true);
-              setIsDraggingEnabled(false);
-
-              const onMouseMove = (e) => {
-                if (isRotatingEnabled) {
-                  const deltaX = e.movementX;
-                  modelGroup.rotation.y += deltaX * 0.02; // Adjust rotation speed as needed
-                }
-              };
-
-              const onMouseUp = () => {
-                setIsRotatingEnabled(false);
-                setIsDraggingEnabled(true);
-                sceneObjects.renderer.domElement.removeEventListener("mousemove", onMouseMove);
-                sceneObjects.renderer.domElement.removeEventListener("mouseup", onMouseUp);
-              };
-
-              sceneObjects.renderer.domElement.addEventListener("mousemove", onMouseMove);
-              sceneObjects.renderer.domElement.addEventListener("mouseup", onMouseUp);
-            }
-          });
-
-          // Enable dragging on left-click and disable rotation
-          sceneObjects.renderer.domElement.addEventListener("mousedown", (event) => {
-            if (event.button === 0) {
-              // Left-click
-              setIsDraggingEnabled(true);
-              setIsRotatingEnabled(false);
-            }
-          });
-        },
-        undefined,
-        (error) => {
-          setError("Error loading model");
-          console.error("Error loading model:", error);
-        }
-      );
-    },
-    [sceneObjects, floorplanBounds, isDraggingEnabled, isRotatingEnabled]
-  );
+    // Trigger download
+    const link = document.createElement('a');
+    link.href = collageDataUrl;
+    link.download = 'floorplan_collage.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -239,19 +168,18 @@ const FloorPlan3D = () => {
       mountRef.current.clientHeight
     );
     renderer.setPixelRatio(window.devicePixelRatio);
-
-    // Updated settings for newer Three.js versions
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    // Remove gammaFactor and gammaOutput as they're no longer needed in newer versions
 
     mountRef.current.appendChild(renderer.domElement);
 
+    // Initialize floor
     const floorMaterial = new THREE.MeshStandardMaterial({
       color: 0xf0f0f0,
       roughness: 0.5,
       metalness: 0.1,
     });
 
+    // Calculate floor dimensions
     let minX = Infinity,
       maxX = -Infinity,
       minY = Infinity,
@@ -270,6 +198,7 @@ const FloorPlan3D = () => {
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
 
+    // Create walls
     const wallHeight = 250;
     const wallThickness = 10;
     const wallMeshes = [];
@@ -279,87 +208,86 @@ const FloorPlan3D = () => {
       const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
       const centerWallX = (x1 + x2) / 2 - centerX;
       const centerWallY = (y1 + y2) / 2 - centerY;
-    
+
       const wallGeometry = new THREE.BoxGeometry(
         length,
         wallHeight,
         wallThickness
       );
-    
-      // Create a unique material for each wall
+
       const wallMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         roughness: 0.2,
         metalness: 0.1,
         transparent: true,
         opacity: 1,
-        side: THREE.DoubleSide  // Add this line
+        side: THREE.DoubleSide
       });
-    
+
       const wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
-    
       wallMesh.position.set(centerWallX, wallHeight / 2, centerWallY);
       const angle = Math.atan2(y2 - y1, x2 - x1);
       wallMesh.rotation.y = -angle;
-    
+
       scene.add(wallMesh);
       wallMeshes.push(wallMesh);
       wallMeshesRef.current.push(wallMesh);
     });
 
-    console.log("Wall Meshes:", wallMeshesRef.current); // Debugging
-
+    // Handle wall painting
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
     const handleWallClick = (event) => {
-      
-      if (!isPaintMode || !selectedPaint) return;
-
-      console.log("Wall Clicked"); // Debugging
-      console.log("Is Paint Mode:", isPaintMode); // Debugging
-      console.log("Selected Paint:", selectedPaint); // Debugging
+      if (!isPaintMode || !selectedPaint) {
+        console.log("Paint mode is not active or no paint is selected.");
+        return;
+      }
     
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     
-      console.log("Mouse Coordinates:", mouse.x, mouse.y); // Debugging
-    
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(wallMeshesRef.current);
     
-      console.log("Intersects:", intersects); // Debugging
-    
       if (intersects.length > 0) {
         const wallMesh = intersects[0].object;
-        console.log("Wall Mesh to Paint:", wallMesh); // Debugging
+        console.log("Wall clicked:", wallMesh);
+        console.log("Selected paint color:", selectedPaint.color);
+    
+        // Dispose of the old material
         if (wallMesh.material) {
+          console.log("Disposing old material:", wallMesh.material);
           wallMesh.material.dispose();
         }
+    
+        // Create a new material with the selected color
         const newMaterial = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(selectedPaint.color),
+          color: new THREE.Color(selectedPaint.color), // Ensure the color is valid
           roughness: 0.2,
           metalness: 0.1,
-          side: THREE.DoubleSide,  // Ensure both sides of walls are visible
+          side: THREE.DoubleSide,
         });
+    
+        // Apply the new material to the wall mesh
         wallMesh.material = newMaterial;
-        wallMesh.material.needsUpdate = true;
-        wallMesh.geometry.computeBoundingSphere();
-        sceneObjects.scene.needsUpdate = true;
-        console.log("New Material:", wallMesh.material);
-        console.log("New Material Color:", wallMesh.material.color);
-        requestAnimationFrame(() => {
-          sceneObjects.renderer.render(sceneObjects.scene, sceneObjects.camera);
-        });
+        wallMesh.material.needsUpdate = true; // Ensure the material is updated
+        wallMesh.geometry.computeBoundingSphere(); // Recompute bounding sphere
+    
+        console.log("Wall material after update:", wallMesh.material);
+    
+        // Force a re-render of the scene
+        renderer.render(scene, camera);
+        console.log("Scene re-rendered with updated wall color.");
       } else {
-        console.log("No intersection detected"); // Debugging
+        console.log("No wall was clicked.");
       }
     };
 
     renderer.domElement.addEventListener('click', handleWallClick);
-    console.log("Wall Click Listener Attached"); // Debugging
 
+    // Create floor
     const floorWidth = maxX - minX;
     const floorDepth = maxY - minY;
     const floorGeometry = new THREE.PlaneGeometry(floorWidth, floorDepth);
@@ -368,7 +296,7 @@ const FloorPlan3D = () => {
     floor.position.set(0, 0, 0);
     scene.add(floor);
 
-    // Set floorplan bounds for model movement
+    // Set floorplan bounds
     setFloorplanBounds({
       minX: -floorWidth / 2,
       maxX: floorWidth / 2,
@@ -376,6 +304,7 @@ const FloorPlan3D = () => {
       maxZ: floorDepth / 2,
     });
 
+    // Setup lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
@@ -387,6 +316,7 @@ const FloorPlan3D = () => {
     directionalLight2.position.set(-500, 1000, -500);
     scene.add(directionalLight2);
 
+    // Setup controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.1;
@@ -395,8 +325,15 @@ const FloorPlan3D = () => {
     controls.minDistance = 500;
     controls.maxDistance = 3000;
     controls.target.set(0, wallHeight / 2, 0);
+    controls.enabled = true; // Make sure it's enabled by default
+    controls.enableRotate = true;
+    controls.rotateSpeed = 0.5;
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.panSpeed = 0.5;
     controlsRef.current = controls;
 
+    // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
       controls.update();
@@ -406,6 +343,7 @@ const FloorPlan3D = () => {
 
     setSceneObjects({ scene, camera, renderer, floor });
 
+    // Handle window resize
     const handleResize = () => {
       camera.aspect =
         mountRef.current.clientWidth / mountRef.current.clientHeight;
@@ -417,6 +355,7 @@ const FloorPlan3D = () => {
     };
     window.addEventListener("resize", handleResize);
 
+    // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
       mountRef.current?.removeChild(renderer.domElement);
@@ -427,20 +366,55 @@ const FloorPlan3D = () => {
           object.material.dispose();
         }
       });
-
-      // Cleanup drag and rotation event listeners
-      if (dragControlsRef.current) {
-        dragControlsRef.current.dispose();
-      }
       renderer.domElement.removeEventListener('click', handleWallClick);
     };
   }, [location, selectedPaint, isPaintMode]);
 
   return (
     <div className="decora-container">
+      <nav className="nav">
+        <div className="nav-content">
+          <div className="nav-left">
+            <h1 className="logo">Decora</h1>
+            <div className="nav-links">
+              {/* <a href="/">Design</a> */}
+              <a href="/products">Products</a>
+              <Link to={`/${user_id}/budget-estimator`}>Budget Estimator</Link>
+            </div>
+          </div>
+          <div className="nav-right">
+            <div className="search-container">
+              <input
+                type="text"
+                placeholder="Search"
+                className="search-input"
+              />
+              <Search className="search-icon" />
+            </div>
+            <button className="profile-button">
+              <User className="profile-icon" />
+            </button>
+            <LogoutButton />
+          </div>
+        </div>
+      </nav>
       <div className="main-content">
         <div className="layout-container">
+          <button className="tool3d-button" onClick={handleDownload}>Download</button>
           <div ref={mountRef} className="threejs-container" />
+          {sceneObjects && (
+            <ModelRenderer
+              scene={sceneObjects.scene}
+              camera={sceneObjects.camera}
+              renderer={sceneObjects.renderer}
+              selectedModel={selectedModel}
+              walls={location.state?.layout || []}
+              floorBounds={floorplanBounds}
+              onError={setError}
+              onLoadingChange={setIsLoading}
+              orbitControls={controlsRef.current}
+            />
+          )}
           {isLoading && <div className="loading-indicator">Loading...</div>}
           {error && <div className="error-message">{error}</div>}
         </div>
@@ -459,16 +433,22 @@ const FloorPlan3D = () => {
             >
               FURNITURE
             </button>
-            <button
+            {/* <button
               className={`header-button ${activeTab === "PAINT" ? "active" : ""}`}
               onClick={() => setActiveTab("PAINT")}
             >
               PAINT
+            </button> */}
+            <button
+              className={`header-button ${activeTab === "CART" ? "active" : ""}`}
+              onClick={() => setActiveTab("CART")}
+            >
+              CART
             </button>
           </div>
 
           <div className="furniture-grid">
-            {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} />}
+            {activeTab === "FURNITURE" && <FurnitureGrid products={furnitureItems} items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
             {activeTab === "MODELS" && (
               <ModelGrid
                 apiKey="9d2379512bd84812beb65f0ffe608310"
@@ -476,6 +456,7 @@ const FloorPlan3D = () => {
               />
             )}
             {activeTab === 'PAINT' && <PaintGrid onPaintSelect={handlePaintSelect} />}
+            {activeTab === "CART" && <Cart items={cartItems} handleCartItems={handleCartItems} cartPrice={cartPrice} handleCartPrice={SetCartPrice} />}
           </div>
         </div>
       </div>

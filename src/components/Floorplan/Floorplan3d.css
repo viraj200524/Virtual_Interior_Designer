@@ -3,14 +3,15 @@
 
 .decora-container {
     min-height: 100vh;
-    background-color: #c9a673;
-    padding: 2rem;
+    background-color: #f1e7d8;
+    /* padding: 2rem; */
 }
 
 .main-content {
     display: flex;
     gap: 2rem;
     height: calc(100vh - 4rem);
+    padding: 2rem;
 }
 
 .layout-container {
@@ -19,7 +20,7 @@
     border-radius: 1rem;
     overflow: hidden;
     border: 2px solid #DEB887;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0);
 }
 
 .threejs-container {
@@ -46,6 +47,7 @@
     border-bottom: 2px solid #DEB887;
 }
 
+
 .header-button {
     background: none;
     border: none;
@@ -69,7 +71,7 @@
 
 .furniture-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 1rem;
     padding: 1rem;
     overflow-y: auto;
@@ -215,3 +217,29 @@
         font-size: 0.9rem;
     }
 }
+
+.tool3d-button {
+    position: absolute;
+    bottom: 20px;
+    right: 540px;
+    padding: 8px 16px;
+    border: 1px solid #8B4513;
+    border-radius: 10px;
+    background-color: #8B4513;
+    color:white;
+    cursor: pointer;
+    font-size: 14px;
+    z-index: 10; /* Ensure button stays above the canvas */
+    transition: all 0.3s ease;
+  }
+
+.tool3d-button.active {
+  background-color: #8B4513;
+  color: white;
+}
+
+.tool3d-button:hover {
+  background-color: #CD853F;
+  color: white;
+}
+

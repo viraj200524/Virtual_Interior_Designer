@@ -3,15 +3,17 @@ import "./RoomCard.css";
 import { useNavigate } from "react-router-dom";
 import { Plus, Home, Utensils, Bed, Armchair } from "lucide-react";
 
-function RoomCard({ title, isAdd = false, onAdd, onDelete }) {
+function RoomCard({ title, isAdd = false, onAdd, onDelete, userId }) {
   const navigate = useNavigate();
+
+  const roomId =`${title}=room`
 
   
   const handleCardClick = () => {
     if (isAdd) {
       onAdd();
     } else {
-      navigate("/floorplan2d"); //ADD LINK HERE 
+      navigate(`/${userId}/${roomId}/floorplan2d`); //ADD LINK HERE 
     }
   };
 

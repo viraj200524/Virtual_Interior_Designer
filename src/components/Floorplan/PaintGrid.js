@@ -1,5 +1,6 @@
 import React from 'react';
-import './PaintGrid.css'
+import './PaintGrid.css';
+
 const PaintGrid = ({ onPaintSelect }) => {
   const paints = [
     { id: 1, name: 'Classic White', color: '#FFFFFF', price: '$29.99' },

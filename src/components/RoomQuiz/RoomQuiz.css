@@ -215,3 +215,8 @@
     margin-left: -10%; /* Shift it more to the left */
     box-sizing: border-box; /* Ensure padding and border are included in the width */
   }
+
+  .logo-link {
+    text-decoration: none; /* Removes underline */
+    color: inherit; /* Uses the same color as parent (.logo) */
+}

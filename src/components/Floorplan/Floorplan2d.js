@@ -140,7 +140,9 @@ const FloorPlan = ({userId}) => {
       <nav className="nav">
         <div className="nav-content">
           <div className="nav-left">
-            <h1 className="logo">Decora</h1>
+          <h1 className="logo">
+    <a href="/main-page" className="logo-link">Decora</a>
+</h1>
             <div className="nav-links">
               {/* <a href="/">Design</a> */}
               <a href="/products">Products</a>

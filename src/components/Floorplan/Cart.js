@@ -31,7 +31,7 @@ const Cart = ({ items, handleCartItems, cartPrice, handleCartPrice }) => {
             </div>
 
             {/* Price bar at bottom */}
-            <div className='furniture-footer'>
+            <div className='price-container'>
                     <h2 className='priceh1'>
                         Price : {cartPrice}
                     </h2>

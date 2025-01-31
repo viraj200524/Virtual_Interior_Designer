@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { MessageSquareText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import { MessageSquareText } from "lucide-react";
+
 function Chatbot() {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [dots, setDots] = useState("");
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -15,113 +15,120 @@ function Chatbot() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatLog, isLoading]); // Scroll on new messages or loading state change
-
-  useEffect(() => {
-    if (isLoading) {
-      const interval = setInterval(() => {
-        setDots((prev) => (prev.length < 3 ? prev + "." : ""));
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  }, [isLoading]);
+  }, [chatLog, isLoading]);
 
   useEffect(() => {
     if (isOpen && chatLog.length === 0) {
-      setChatLog([{ user: 'bot', message: 'Welcome, How May I Assist You!' }]);
+      setChatLog([{ user: "bot", message: "Welcome, How May I Assist You!" }]);
     }
   }, [isOpen, chatLog.length]);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-    const newChatLog = [...chatLog, { user: 'me', message }];
+    const newChatLog = [...chatLog, { user: "me", message }];
     setChatLog(newChatLog);
-    setMessage('');
+    setMessage("");
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
+      const response = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
       });
       const data = await response.json();
-      setChatLog([...newChatLog, { user: 'bot', message: data.response }]);
+      setChatLog([...newChatLog, { user: "bot", message: data.response }]);
     } catch (error) {
       console.error(error);
-      setChatLog([...newChatLog, { user: 'bot', message: 'Sorry, something went wrong!' }]);
+      setChatLog([
+        ...newChatLog,
+        { user: "bot", message: "Sorry, something went wrong!" },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div 
+    <div
       style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
         zIndex: 1000,
+        fontFamily:
+          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
       {isOpen ? (
-        <div 
+        <div
           style={{
-            width: '320px',
-            height: '400px',
-            backgroundColor: '#fff',
-            borderRadius: '16px',
-            boxShadow: '0 8px 32px rgba(139, 69, 19, 0.15)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            transition: 'all 0.3s ease',
-            animation: 'slideUp 0.3s ease-out',
-            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            width: "380px",
+            height: "500px",
+            backgroundColor: "#F5F5F5",
+            borderRadius: "20px",
+            boxShadow: "0 15px 50px rgba(139, 69, 19, 0.2)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            border: "1px solid rgba(139, 69, 19, 0.1)",
+            transition: "all 0.3s ease",
           }}
         >
           <div
             style={{
-              padding: '12px 16px',
-              background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
-              color: '#fff',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              boxShadow: '0 2px 4px rgba(139, 69, 19, 0.1)',
+              padding: "15px 20px",
+              background: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+              color: "#fff",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#d7bb91',
-              }} />
-              <strong style={{ 
-                fontSize: '16px', 
-                letterSpacing: '0.5px',
-                fontFamily: "'Playfair Display', serif",
-                fontWeight: '2000'
-              }}>Bodaskar Bot</strong>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div
+                style={{
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  backgroundColor: "#D2691E",
+                  boxShadow: "0 0 5px rgba(255,255,255,0.5)",
+                }}
+              />
+              <strong
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: "18px",
+                  letterSpacing: "0.7px",
+                  fontWeight: "600",
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.2)",
+                }}
+              >
+                Lumi
+              </strong>
             </div>
             <button
               onClick={() => setIsOpen(false)}
               style={{
-                background: 'none',
-                border: 'none',
-                color: '#fff',
-                cursor: 'pointer',
-                fontSize: '20px',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'transform 0.2s ease',
-                transform: 'scale(1)',
+                background: "none",
+                border: "none",
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: "24px",
+                padding: "5px",
+                lineHeight: "1",
+                transition: "transform 0.2s ease, color 0.2s ease",
+                transformOrigin: "center",
               }}
-              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "rotate(90deg)";
+                e.currentTarget.style.color = "#FFD700";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "rotate(0deg)";
+                e.currentTarget.style.color = "#fff";
+              }}
             >
               ×
             </button>
@@ -130,41 +137,51 @@ function Chatbot() {
           <div
             style={{
               flex: 1,
-              padding: '16px',
-              overflowY: 'auto',
-              backgroundColor: '#FDF5E6',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              scrollBehavior: 'smooth',
+              padding: "20px",
+              overflowY: "auto",
+              background:
+                "linear-gradient(to bottom, #FDF5E6 0%, #F5DEB3 100%)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+              scrollBehavior: "smooth",
             }}
           >
             {chatLog.map((msg, index) => (
               <div
                 key={index}
                 style={{
-                  display: 'flex',
-                  justifyContent: msg.user === 'me' ? 'flex-end' : 'flex-start',
-                  animation: `${msg.user === 'me' ? 'slideLeft' : 'slideRight'} 0.3s ease-out`,
+                  display: "flex",
+                  justifyContent: msg.user === "me" ? "flex-end" : "flex-start",
+                  perspective: "1000px",
                 }}
               >
                 <div
                   style={{
-                    maxWidth: '80%',
-                    padding: '10px 14px',
-                    borderRadius: '16px',
-                    backgroundColor: msg.user === 'me' ? '#8B4513' : '#fff',
-                    color: msg.user === 'me' ? '#fff' : '#000',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    borderBottomRightRadius: msg.user === 'me' ? '4px' : '16px',
-                    borderBottomLeftRadius: msg.user === 'me' ? '16px' : '4px',
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    letterSpacing: '0.2px',
-                    fontWeight: '400',
+                    maxWidth: "75%",
+                    padding: "12px 16px",
+                    borderRadius: "18px",
+                    backgroundColor: msg.user === "me" ? "#8B4513" : "#FFFFFF",
+                    color: msg.user === "me" ? "#fff" : "#8B4513",
+                    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    fontSize: "15px",
+                    lineHeight: "1.6",
+                    letterSpacing: "0.3px",
+                    fontWeight: "400",
+                    transformStyle: "preserve-3d",
+                    transform: "translateZ(10px)",
+                    transition: "transform 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform =
+                      "translateZ(20px) scale(1.02)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform =
+                      "translateZ(10px) scale(1)";
                   }}
                 >
-                  {msg.user === 'bot' ? (
+                  {msg.user === "bot" ? (
                     <ReactMarkdown>{msg.message}</ReactMarkdown>
                   ) : (
                     msg.message
@@ -173,58 +190,64 @@ function Chatbot() {
               </div>
             ))}
             {isLoading && (
-              <div style={{ display: 'flex', gap: '4px', padding: '8px' }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: '#8B4513',
-                  animation: 'bounce 0.6s infinite',
-                }} />
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: '#8B4513',
-                  animation: 'bounce 0.6s infinite 0.2s',
-                }} />
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: '#8B4513',
-                  animation: 'bounce 0.6s infinite 0.4s',
-                }} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  gap: "6px",
+                  padding: "10px",
+                }}
+              >
+                {[1, 2, 3].map((dot) => (
+                  <div
+                    key={dot}
+                    style={{
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      backgroundColor: "#8B4513",
+                      animation: `pulse 1s infinite ${dot * 0.2}s`,
+                    }}
+                  />
+                ))}
               </div>
             )}
-            <div ref={messagesEndRef} /> {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
 
           <div
             style={{
-              padding: '12px',
-              borderTop: '1px solid rgba(139, 69, 19, 0.1)',
-              backgroundColor: '#fff',
+              padding: "15px 20px",
+              borderTop: "1px solid rgba(139, 69, 19, 0.1)",
+              background: "linear-gradient(to right, #F4A460, #D2691E)",
+              boxShadow: "0 -4px 10px rgba(0,0,0,0.05)",
             }}
           >
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: "flex", gap: "10px" }}>
               <input
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                 style={{
                   flex: 1,
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  border: '1px solid #d7bb91',
-                  outline: 'none',
-                  transition: 'border-color 0.2s ease',
-                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                  fontSize: '14px',
+                  padding: "10px 15px",
+                  borderRadius: "25px",
+                  border: "2px solid #D2B48C",
+                  outline: "none",
+                  transition: "all 0.3s ease",
+                  fontSize: "15px",
+                  boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)",
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#8B4513'}
-                onBlur={(e) => e.target.style.borderColor = '#d7bb91'}
+                onFocus={(e) => {
+                  e.target.style.borderColor = "#8B4513";
+                  e.target.style.boxShadow =
+                    "inset 0 2px 4px rgba(139, 69, 19, 0.1), 0 0 10px rgba(139, 69, 19, 0.1)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = "#D2B48C";
+                  e.target.style.boxShadow = "inset 0 2px 4px rgba(0,0,0,0.05)";
+                }}
                 placeholder="Type a message..."
                 disabled={isLoading}
               />
@@ -232,20 +255,28 @@ function Chatbot() {
                 onClick={sendMessage}
                 disabled={isLoading}
                 style={{
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  border: 'none',
-                  backgroundColor: '#8B4513',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  transform: 'scale(1)',
-                  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                  fontSize: '14px',
-                  fontWeight: '500',
+                  padding: "10px 20px",
+                  borderRadius: "25px",
+                  border: "none",
+                  background:
+                    "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  fontSize: "15px",
+                  fontWeight: "500",
+                  boxShadow: "0 4px 10px rgba(139, 69, 19, 0.2)",
                 }}
-                onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 6px 12px rgba(139, 69, 19, 0.3)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 10px rgba(139, 69, 19, 0.2)";
+                }}
               >
                 Send
               </button>
@@ -256,50 +287,57 @@ function Chatbot() {
         <button
           onClick={() => setIsOpen(true)}
           style={{
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)',
-            border: 'none',
-            color: '#fff',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(139, 69, 19, 0.2)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '24px',
-            transition: 'all 0.3s ease',
-            transform: 'scale(1)',
+            width: "70px",
+            height: "70px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #8B4513 0%, #A0522D 100%)",
+            border: "3px solid rgba(255,255,255,0.2)",
+            color: "#fff",
+            cursor: "pointer",
+            boxShadow: "0 8px 20px rgba(139, 69, 19, 0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.3s ease",
+            transform: "scale(1)",
           }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = "scale(1.1) rotate(5deg)";
+            e.currentTarget.style.boxShadow =
+              "0 12px 25px rgba(139, 69, 19, 0.4)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = "scale(1) rotate(0deg)";
+            e.currentTarget.style.boxShadow =
+              "0 8px 20px rgba(139, 69, 19, 0.3)";
+          }}
         >
-          <MessageSquareText/>
+          <MessageSquareText size={32} strokeWidth={1.5} />
         </button>
       )}
 
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap');
 
-          @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+          @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
           }
 
-          @keyframes slideLeft {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+          ::-webkit-scrollbar {
+            width: 8px;
           }
-
-          @keyframes slideRight {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+          ::-webkit-scrollbar-track {
+            background: #F5DEB3;
+            border-radius: 10px;
           }
-
-          @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+          ::-webkit-scrollbar-thumb {
+            background: #8B4513;
+            border-radius: 10px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #A0522D;
           }
         `}
       </style>

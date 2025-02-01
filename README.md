@@ -1,70 +1,108 @@
-# Getting Started with Create React App
+<h1 align="center">
+  <a href="https://github.com/CommunityOfCoders/Inheritance-2024" style="display: inline-flex; align-items: center; text-decoration: none;">
+    <img src="./COC.png" alt="CoC Inheritance 2024" width="30" height="30" style="vertical-align: middle;">
+    <span style="margin-left: 10px; font-size: 24px; font-weight: bold;">CoC Inheritance 2024</span>
+  </a>
+  <br>
+  Decora: Virtual Interior Designer
+</h1>
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+<details>
+<summary>Table of Contents</summary>
 
-In the project directory, you can run:
+- [Description](#description)
+- [Links](#links)
+- [Tech Stack](#tech-stack)
+- [Progress](#progress)
+- [Future Scope](#future-scope)
+- [Applications](#applications)
+- [Project Setup](#project-setup)
+- [Usage](#usage)
+- [Team Members](#team-members)
+- [Mentors](#mentors)
+- [Screenshots](#screenshots)
 
-### `npm start`
+</details>
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📝Description
+- The Virtual Interior Designer is an innovative and user-friendly platform designed to help users visualize and plan their dream interiors effortlessly. With a personal profile-based account system, users can save and manage their projects conveniently.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🔗Links
 
-### `npm run build`
+- [GitHub Repository](https://github.com/vidhirohira/Virtual_Interior_Designer)
+- [Demo Video of Decora](https://drive.google.com/drive/folders/1-6YKqTX5RRUrAFTY-_hjR4_FCZ93Mawg?usp=drive_link)
+- [Screenshots of Decora](https://drive.google.com/drive/folders/1-7m2Abz8JKoboT-Y_hvocWGRv1XRkkHf)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🤖Tech-Stack
 
-### `npm run eject`
+#### Front-end
+- HTML
+- CSS
+- JavaScript
+- React
+- Python
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### Machine Learning
+- ML
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📈Progress
+-  2D to 3D Floor Plan Conversion
+  Create your custom 2D floor plan, and the platform will seamlessly convert it into a 3D model, offering a realistic view of your space.
+-  Personalized Interior Design
+  Enjoy complete freedom to choose and place furniture and decor items as per your preferences.
+  Customize layouts to match your vision and style.
+-  Online Furniture Suggestions
+  Get access to a variety of furniture options scraped from online sources.
+  Compare styles, prices, and features before making a choice.
+-  House Detail Form Filling
+  Input essential house details through a guided form to receive tailored design suggestions.
+-  Budget Estimation
+   Get an estimated budget for your house renovation or interior design based on your selected products and preferences.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+## 🔮Future Scope
+- AI-Powered Design Suggestions – Implement machine learning to provide intelligent furniture placement and interior design recommendations based on user preferences and trends.
+- Augmented Reality (AR) Integration – Allow users to visualize furniture placements in real-time using AR for a more immersive experience.
+- Smart Home Integration – Enable compatibility with smart home devices to suggest and integrate IoT-based home automation solutions.
+- Expanded Furniture Database – Enhance the platform by scraping more furniture options from various online marketplaces.
+- Collaboration Feature – Allow multiple users to collaborate on a single interior design project, making it ideal for teams and professional designers.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 💸Applications
+- Homeowners & Renters – Plan and visualize home interiors before making any purchase or renovation decisions.
+- Interior Designers – A powerful tool for designers to create, showcase, and modify designs according to client requirements.
+- Furniture Retailers & E-commerce Platforms – Enhance customer experience by allowing them to place and visualize products in their own space.
+- Real Estate & Property Developers – Provide prospective buyers with a virtual interior setup for better property visualization.
+- Construction & Renovation Services – Assist contractors in planning and estimating renovation costs efficiently.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🛠Project Setup
 
-### Code Splitting
+For the Web-App 1.Clone the GitHub repo.
+```bash
+git clone <https://github.com/vidhirohira/Virtual_Interior_Designer>
+```
+2.Enter the client directory. Install all the required dependencies.
+```bash
+  cd Virtual Interior Designer
+  npm install
+  npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-### Analyzing the Bundle Size
+## 👨‍💻Team Members
+- [Vidhi Rohira ](https://github.com/vidhirohira)
+- [Dhruv Panchal ](https://github.com/Dhruvp18)
+- [Viraj Vora ](https://github.com/viraj200524)
+- [Chaitra Samant ](https://github.com/chaitra-samant)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 👨‍🏫Mentors
+- [Adi Awaskar ](https://github.com/adiawaskar)
+- [Aarya Bodas ](https://github.com/aarya-16)
 
-### Making a Progressive Web App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

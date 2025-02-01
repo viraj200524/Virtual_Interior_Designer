@@ -15,32 +15,34 @@ function NavLink({ children, to }) {
 }
 
 function Navigation() {
-    return (
-      <nav className="nav">
-        <div className="nav-content">
-          <div className="nav-left">
-            <h1 className="logo">
-            <a href="/main-page">Decora</a></h1>
-            <div className="nav-links">
-              {/* <NavLink to="/">Design</NavLink> */}
-              {/* <NavLink to="/products">Products</NavLink> */}
-              <a href="/budget-estimator">Budget Estimator</a>
-            </div>
-          </div>
-          <div className="nav-right">
-            <div className="search-container">
-              <input type="text" placeholder="Search" className="search-input" />
-              <Search className="search-icon" />
-            </div>
-            <button className="profile-button">
-              <User className="profile-icon" />
-            </button>
-            <LogoutButton />
+  return (
+    <nav className="nav">
+      <div className="nav-content">
+        <div className="nav-left">
+          <h1 className="logo">
+            <a href="/main-page" className="logo-link">Decora</a>
+          </h1>
+
+          <div className="nav-links">
+            {/* <NavLink to="/">Design</NavLink> */}
+            {/* <NavLink to="/products">Products</NavLink> */}
+            <a href="/budget-estimator">Budget Estimator</a>
           </div>
         </div>
-      </nav>
-    );
-  }
+        <div className="nav-right">
+          <div className="search-container">
+            <input type="text" placeholder="Search" className="search-input" />
+            <Search className="search-icon" />
+          </div>
+          <button className="profile-button">
+            <User className="profile-icon" />
+          </button>
+          <LogoutButton />
+        </div>
+      </div>
+    </nav>
+  );
+}
 
   const questions = [
     {

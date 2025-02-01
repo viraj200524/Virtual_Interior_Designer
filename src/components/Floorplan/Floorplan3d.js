@@ -375,7 +375,9 @@ const FloorPlan3D = () => {
       <nav className="nav">
         <div className="nav-content">
           <div className="nav-left">
-            <h1 className="logo">Decora</h1>
+          <h1 className="logo">
+    <a href="/main-page" className="logo-link">Decora</a>
+</h1>
             <div className="nav-links">
               {/* <a href="/">Design</a> */}
               <a href="/products">Products</a>
@@ -400,19 +402,19 @@ const FloorPlan3D = () => {
       </nav>
       <div className="main-content">
         <div className="layout-container">
-          <button className="tool3d-button" onClick={handleDownload}>Download</button>
           <div ref={mountRef} className="threejs-container" />
+          <button className="tool3d-button" onClick={handleDownload}>Download</button>
           {sceneObjects && (
             <ModelRenderer
-              scene={sceneObjects.scene}
-              camera={sceneObjects.camera}
-              renderer={sceneObjects.renderer}
-              selectedModel={selectedModel}
-              walls={location.state?.layout || []}
-              floorBounds={floorplanBounds}
-              onError={setError}
-              onLoadingChange={setIsLoading}
-              orbitControls={controlsRef.current}
+            scene={sceneObjects.scene}
+            camera={sceneObjects.camera}
+            renderer={sceneObjects.renderer}
+            selectedModel={selectedModel}
+            walls={location.state?.layout || []}
+            floorBounds={floorplanBounds}
+            onError={setError}
+            onLoadingChange={setIsLoading}
+            orbitControls={controlsRef.current}
             />
           )}
           {isLoading && <div className="loading-indicator">Loading...</div>}

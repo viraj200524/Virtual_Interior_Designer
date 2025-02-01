@@ -135,3 +135,8 @@ input {
 .konvajs-content text {
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+.logo-link {
+  text-decoration: none; /* Removes underline */
+  color: inherit; /* Uses the same color as parent (.logo) */
+}

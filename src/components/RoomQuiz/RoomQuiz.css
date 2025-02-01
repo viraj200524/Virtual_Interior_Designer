@@ -206,10 +206,26 @@
   margin: 10px 0;
 }
 
-.quiz-done-text {
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  color: #463024;
-  font-size: 1.5rem;
-  margin: 10px 0;
+  .quiz-done-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; /* To make it bold */
+    color: #463024; /* Same color as the option text */
+    font-size: 1.5rem; /* Adjust the size as needed */
+    margin: 10px 0;
+  }
+
+  .quiz-input {
+    width: 120%; /* Expand the length */
+    padding: 12px; /* Slightly increase padding for better appearance */
+    border: 1px solid #ccc;
+    border-radius: 15px; /* Make corners more rounded */
+    font-size: 16px;
+    margin-top: 5px; /* Reduce top margin to shift it upward */
+    margin-left: -10%; /* Shift it more to the left */
+    box-sizing: border-box; /* Ensure padding and border are included in the width */
+  }
+
+  .logo-link {
+    text-decoration: none; /* Removes underline */
+    color: inherit; /* Uses the same color as parent (.logo) */
 }

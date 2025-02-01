@@ -23,7 +23,7 @@ function Navigation() {
             <a href="/main-page">Decora</a></h1>
             <div className="nav-links">
               {/* <NavLink to="/">Design</NavLink> */}
-              <NavLink to="/products">Products</NavLink>
+              {/* <NavLink to="/products">Products</NavLink> */}
               <a href="/budget-estimator">Budget Estimator</a>
             </div>
           </div>

@@ -74,6 +74,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
@@ -86,6 +87,8 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
   margin: 1rem 0;
+  width: 100%;
+  align-items: center;
 }
 
 .quiz-option {
@@ -151,14 +154,16 @@
 }
 
 .quiz-input {
-  width: 100%;
-  max-width: 300px;
+  width: 300px;
   padding: 0.75rem;
   font-size: 1rem;
   border: 2px solid #DEB887;
   border-radius: 0.5rem;
-  margin: 1rem 0;
+  margin: 1rem auto;
   transition: all 0.3s ease;
+  text-align: center;
+  display: block;
+  color: #8B4513;
 }
 
 .quiz-input:focus {
@@ -187,31 +192,24 @@
   .quiz-option {
     padding: 1rem;
   }
+
+  .quiz-input {
+    width: 80%;
+  }
 }
 
 .budget-display {
-    font-family: 'Playfair Display', serif;
-    color: #8B4513; /* Matches the text color for consistency */
-    font-size: 2rem;
-    font-weight: bold;
-    margin: 10px 0;
-  }
+  font-family: 'Playfair Display', serif;
+  color: #8B4513;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
 
-  .quiz-done-text {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700; /* To make it bold */
-    color: #463024; /* Same color as the option text */
-    font-size: 1.5rem; /* Adjust the size as needed */
-    margin: 10px 0;
-  }
-
-  .quiz-input {
-    width: 120%; /* Expand the length */
-    padding: 12px; /* Slightly increase padding for better appearance */
-    border: 1px solid #ccc;
-    border-radius: 15px; /* Make corners more rounded */
-    font-size: 16px;
-    margin-top: 5px; /* Reduce top margin to shift it upward */
-    margin-left: -10%; /* Shift it more to the left */
-    box-sizing: border-box; /* Ensure padding and border are included in the width */
-  }
+.quiz-done-text {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: #463024;
+  font-size: 1.5rem;
+  margin: 10px 0;
+}

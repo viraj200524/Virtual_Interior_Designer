@@ -45,7 +45,14 @@
 - CSS
 - JavaScript
 - React
+- Three.js
+- Two.js
+- conva.js
+
+#### Back-end
+- Flask
 - Python
+  
 
 #### Machine Learning
 - ML

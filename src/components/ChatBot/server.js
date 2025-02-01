@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config({ path: './.env' });
 
 const app = express();
 app.use(cors());
@@ -40,7 +40,7 @@ app.post('/api/chat', async (req, res) => {
       res.status(500).json({ error: 'Something went wrong' });
     }
   });
-const PORT = process.env.PORT || 5001;
+const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

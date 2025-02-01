@@ -192,10 +192,10 @@ function Navigation() {
             <div className="quiz-card">
               <div className="text-center p-4">
                 <CheckCircle className="quiz-completion-icon w-12 h-12 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-[#463024] mb-2">
+                <h2 className="text-xl font-bold text-[#463024] mb-2" style={{color:"#8B4513"}}>
                   {loading ? 'Calculating your budget...' : 'Done! 🎉'}
                 </h2>
-                <p className="text-[#694832] mb-4">
+                <p className="text-[#694832] mb-4" style={{color:"#8B4513"}}>
                   {loading
                     ? 'Please wait while we calculate your estimated budget...'
                     : `The estimated budget for your room is:`}
@@ -203,9 +203,9 @@ function Navigation() {
                 {!loading && (
                   <h3 className="budget-display">
                     {estimatedBudget && !isNaN(estimatedBudget)
-                      ? `₹ ${Number(estimatedBudget).toLocaleString('en-IN', {
-                          maximumFractionDigits: 0,
-                        })}`
+                      ? `₹ ${Number(Math.ceil(estimatedBudget / 100000) * 100000).toLocaleString('en-IN', {
+  maximumFractionDigits: 0,
+})}`
                       : 'N/A'}
                   </h3>
                 )}

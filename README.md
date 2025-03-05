@@ -32,7 +32,7 @@
 
 ## 🔗Links
 
-- [GitHub Repository](https://github.com/chaitra-samant/Decora)
+- [GitHub Repository](https://github.com/viraj200524/Virtual_Interior_Designer.git)
 - [Demo Video of Decora](https://drive.google.com/drive/folders/1-6YKqTX5RRUrAFTY-_hjR4_FCZ93Mawg?usp=drive_link)
 - [Screenshots of Decora](https://drive.google.com/drive/folders/1-7m2Abz8JKoboT-Y_hvocWGRv1XRkkHf)
 
@@ -84,7 +84,7 @@
 ### 1. Clone the GitHub Repository
 Clone the repository to your local machine using the following command:
 ```bash
-git clone https://github.com/chaitra-samant/Decora
+https://github.com/viraj200524/Virtual_Interior_Designer.git
 ```
 
 ### 2. Set Up API Keys
